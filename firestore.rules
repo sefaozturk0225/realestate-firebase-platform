@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Public okuma (herkes görebilir) - artifacts altındaki tüm public veriler
+    match /artifacts/{appId}/public/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // ✅ EKLEYIN: Root seviyesinde contact_info (basit yol kullanıyorsanız)
+    match /contact_info/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Diğer tüm veriler için güvenli
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

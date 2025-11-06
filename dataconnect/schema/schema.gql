@@ -1,0 +1,26 @@
+type User @table {
+  username: String!
+  createdAt: Timestamp!
+  bio: String
+  profilePictureUrl: String
+}
+
+type Buzz @table {
+  content: String!
+  expiresAt: Timestamp!
+  createdAt: Timestamp!
+  author: User
+}
+
+type Reaction @table {
+  emoji: String!
+  createdAt: Timestamp!
+  user: User
+  buzz: Buzz
+}
+
+type Follow @table(key: ["follower", "followed"]) {
+  follower: User!
+  followed: User!
+  createdAt: Timestamp!
+}
