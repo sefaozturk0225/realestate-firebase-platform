@@ -410,8 +410,8 @@
 
         window.initFirebase = async () => {
     if (firebaseConfig.projectId === PLACEHOLDER_PROJECT_ID) {
-         window.showMessage("🔴 FIREBASE YAPILANDIRMA HATASI: Lütfen index.html dosyasındaki ayarları doldurun.", 'bg-red-600', 8000);
-         console.error("Firebase Config Hatası: Proje ID yer tutucu olarak kaldı. Veritabanı işlemleri devre dışı.");
+         window.showMessage("🔴 YAPILANDIRMA HATASI: Lütfen index.html dosyasındaki ayarları doldurun.", 'bg-red-600', 8000);
+         console.error("Config Hatası: Proje ID yer tutucu olarak kaldı. Veritabanı işlemleri devre dışı.");
          return; 
     }
 
@@ -439,15 +439,15 @@
             }
             isAuthReady = true;
             window.isAuthReady = true; // ✅ Bunu da ekleyin
-            console.log("Firebase Auth Hazır. Veritabanı dinleniyor.");
+            console.log("Veritabanı dinleniyor.");
             listenToProjects(); 
             listenToInquiries();
             listenToContactInfo();
         });
 
     } catch (error) {
-        window.showMessage(`🔴 Firebase Bağlantı Hatası: ${error.message}`, 'bg-red-600', 8000);
-        console.error("Firebase Başlatma Hatası:", error);
+        window.showMessage(`🔴 Bağlantı Hatası: ${error.message}`, 'bg-red-600', 8000);
+        console.error("Başlatma Hatası:", error);
     }
 };
 
@@ -469,7 +469,7 @@
                     window.renderAdminProjectTable(); // Admin Panel Render
                 }
             }, (error) => {
-                console.error("Firestore Hata:", error);
+                console.error("Hata:", error);
                 window.showMessage(`Projeler yüklenirken hata oluştu: ${error.code}`, 'bg-red-600');
             });
         }
@@ -514,7 +514,7 @@ function listenToInquiries(){
     const contactRef = doc(db, CONTACT_INFO_PATH, 'main');
 
     onSnapshot(contactRef, (docSnap) => {
-        console.log("Firestore'dan veri alındı | exists:", docSnap.exists(), "| raw data:", docSnap.data(), "| timestamp:", new Date().toISOString());
+        console.log("Veri alındı | exists:", docSnap.exists(), "| raw data:", docSnap.data(), "| timestamp:", new Date().toISOString());
         
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -535,7 +535,7 @@ function listenToInquiries(){
             }
             
         } else {
-            console.warn("Firestore'da contact_info/main belgesi bulunamadı. | timestamp:", new Date().toISOString());
+            console.warn("Contact_info/main belgesi bulunamadı. | timestamp:", new Date().toISOString());
             
             // ✅ EKLE: Default değerler
             window.contactInfo = {
@@ -559,7 +559,7 @@ function listenToInquiries(){
             window.populateContactForm();
         }
     }, (error) => {
-        console.error("Contact Info Firestore Hata:", error, "| timestamp:", new Date().toISOString());
+        console.error("Contact Info Hata:", error, "| timestamp:", new Date().toISOString());
         window.showMessage(`İletişim bilgileri yüklenirken hata: ${error.message}`, 'bg-red-600');
         
         // ✅ EKLE: Hata durumunda default değerler
@@ -2134,7 +2134,7 @@ window.populateContactForm = function() {
 
     // Firebase Auth'un hazır olmasını bekle
     if (!window.auth) {
-        statusText.textContent = "Firebase başlatılıyor, lütfen bekleyin...";
+        statusText.textContent = "Başlatılıyor, lütfen bekleyin...";
         
         let attempts = 0;
         while (!window.auth && attempts < 50) {
@@ -2143,7 +2143,7 @@ window.populateContactForm = function() {
         }
         
         if (!window.auth) {
-            statusText.textContent = "Hata: Firebase Auth başlatılamadı.";
+            statusText.textContent = "Hata: Başlatılamadı.";
             return;
         }
     }
@@ -2187,7 +2187,7 @@ window.populateContactForm = function() {
         if (error.code === 'auth/invalid-email') {
             message = "Geçersiz e-posta formatı.";
         } else if (error.code === 'auth/invalid-credential') {
-            message = "E-posta veya şifre hatalı. Firebase'de bu kullanıcı bulunamadı.";
+            message = "E-posta veya şifre hatalı. Kullanıcı bulunamadı.";
         } else if (error.code === 'auth/user-not-found') {
             message = "Bu e-posta ile kayıtlı kullanıcı bulunamadı.";
         } else if (error.code === 'auth/wrong-password') {
