@@ -164,20 +164,33 @@
             background: linear-gradient(180deg, #FDE047, #FACC15);
         }
 
-        /* Hero ve Genel Efektler */
+        /* Hero ve Genel Efektler - ✅ PERFORMANS OPTİMİZE */
         .hero-pin-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background-color: #1E293B; /* Sadece düz koyu renk arka plan */
+            background-color: #1E293B;
             z-index: -1;
+            will-change: auto;
         }
         .hero-vignette {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4);
-            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8); 
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
         }
-        .content-overlay { position: relative; z-index: 10; }
+        .content-overlay { 
+            position: relative; 
+            z-index: 10;
+        }
+        
+        /* ✅ PERFORMANS: GPU Accelerated Transforms */
+        .transform {
+            will-change: transform;
+        }
+        .transform:hover {
+            transform: translateZ(0);
+        }
 
-        /* ✅ MOBİL: Dikey sıralama, normal scroll (kullanıcı dostu) */
+        /* ✅ MOBİL: Dikey sıralama, normal scroll (kullanıcı dostu) - GENİŞLETİLDİ */
         .horizontal-scroll-container {
     display: grid;
     grid-template-columns: 1fr; /* Tek sütun - alt alta dizilim */
@@ -190,6 +203,18 @@
     width: 100%;
     max-width: none;
     margin: 0;
+}
+
+/* ✅ MOBİL: Kartlar daha geniş (360px minimum) */
+@media (max-width: 767px) {
+    .horizontal-scroll-container {
+        padding: 0 0.75rem;
+    }
+    
+    .scroll-snap-card,
+    .horizontal-scroll-container > div {
+        min-width: 100%;
+    }
 }
 
 /* ✅ TABLET için 3 sütun GRID LAYOUT (768px - 1023px) */
@@ -403,15 +428,16 @@
         // Global değişkenler
         window.projects = window.projects || []; 
         window.inquiries = window.inquiries || [];
-        window.contactInfo = window.contactInfo || {}; // YENİ: İstekler için global array
+        window.contactInfo = window.contactInfo || {};
+        window.aboutUs = window.aboutUs || { title: '', content: '' }; // ✨ YENİ: Hakkımızda
         window.isAdminLoggedIn = window.isAdminLoggedIn || false; 
         // Base64 ve URL görsellerini modal açıkken tutmak için tek bir array
         window.currentProjectImages = []; 
 
         window.initFirebase = async () => {
     if (firebaseConfig.projectId === PLACEHOLDER_PROJECT_ID) {
-         window.showMessage("🔴 YAPILANDIRMA HATASI: Lütfen index.html dosyasındaki ayarları doldurun.", 'bg-red-600', 8000);
-         console.error("Config Hatası: Proje ID yer tutucu olarak kaldı. Veritabanı işlemleri devre dışı.");
+         window.showMessage("🔴 FIREBASE YAPILANDIRMA HATASI: Lütfen index.html dosyasındaki ayarları doldurun.", 'bg-red-600', 8000);
+         console.error("Firebase Config Hatası: Proje ID yer tutucu olarak kaldı. Veritabanı işlemleri devre dışı.");
          return; 
     }
 
@@ -439,15 +465,16 @@
             }
             isAuthReady = true;
             window.isAuthReady = true; // ✅ Bunu da ekleyin
-            console.log("Veritabanı dinleniyor.");
+            console.log("Firebase Auth Hazır. Veritabanı dinleniyor.");
             listenToProjects(); 
             listenToInquiries();
             listenToContactInfo();
+            listenToAboutUs(); // ✨ YENİ
         });
 
     } catch (error) {
-        window.showMessage(`🔴 Bağlantı Hatası: ${error.message}`, 'bg-red-600', 8000);
-        console.error("Başlatma Hatası:", error);
+        window.showMessage(`🔴 Firebase Bağlantı Hatası: ${error.message}`, 'bg-red-600', 8000);
+        console.error("Firebase Başlatma Hatası:", error);
     }
 };
 
@@ -469,7 +496,7 @@
                     window.renderAdminProjectTable(); // Admin Panel Render
                 }
             }, (error) => {
-                console.error("Hata:", error);
+                console.error("Firestore Hata:", error);
                 window.showMessage(`Projeler yüklenirken hata oluştu: ${error.code}`, 'bg-red-600');
             });
         }
@@ -514,7 +541,7 @@ function listenToInquiries(){
     const contactRef = doc(db, CONTACT_INFO_PATH, 'main');
 
     onSnapshot(contactRef, (docSnap) => {
-        console.log("Veri alındı | exists:", docSnap.exists(), "| raw data:", docSnap.data(), "| timestamp:", new Date().toISOString());
+        console.log("Firestore'dan veri alındı | exists:", docSnap.exists(), "| raw data:", docSnap.data(), "| timestamp:", new Date().toISOString());
         
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -535,7 +562,7 @@ function listenToInquiries(){
             }
             
         } else {
-            console.warn("Contact_info/main belgesi bulunamadı. | timestamp:", new Date().toISOString());
+            console.warn("Firestore'da contact_info/main belgesi bulunamadı. | timestamp:", new Date().toISOString());
             
             // ✅ EKLE: Default değerler
             window.contactInfo = {
@@ -559,7 +586,7 @@ function listenToInquiries(){
             window.populateContactForm();
         }
     }, (error) => {
-        console.error("Contact Info Hata:", error, "| timestamp:", new Date().toISOString());
+        console.error("Contact Info Firestore Hata:", error, "| timestamp:", new Date().toISOString());
         window.showMessage(`İletişim bilgileri yüklenirken hata: ${error.message}`, 'bg-red-600');
         
         // ✅ EKLE: Hata durumunda default değerler
@@ -571,6 +598,57 @@ function listenToInquiries(){
         window.renderContactInfo();
     });
 }
+
+// ✨ YENİ: HAKKIMIZDA LİSTENER
+function listenToAboutUs() {
+    if (!isAuthReady) {
+        console.warn("Auth hazır değil, hakkımızda bilgileri yüklenemedi.");
+        setTimeout(() => {
+            if (isAuthReady) listenToAboutUs();
+        }, 1000);
+        return;
+    }
+    
+    const aboutRef = doc(db, 'settings', 'aboutUs');
+    
+    onSnapshot(aboutRef, (docSnap) => {
+        console.log("Hakkımızda verisi alındı | exists:", docSnap.exists());
+        
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            window.aboutUs = {
+                title: data.title || 'Hakkımızda',
+                content: data.content || ''
+            };
+            console.log("Hakkımızda verisi yüklendi:", window.aboutUs);
+        } else {
+            console.log("Hakkımızda belgesi yok, default değerler kullanılıyor.");
+            window.aboutUs = {
+                title: 'Bozkurt İnşaat Hakkında',
+                content: 'İçerik henüz eklenmedi.'
+            };
+        }
+        
+        // Public sitede göster
+        window.renderAboutUs();
+        
+        // Admin panelinde formu doldur
+        if (window.isAdminLoggedIn) {
+            window.populateAboutForm();
+        }
+    }, (error) => {
+        console.error("Hakkımızda Firestore Hata:", error);
+        window.showMessage(`Hakkımızda bilgileri yüklenirken hata: ${error.message}`, 'bg-red-600');
+        
+        // Hata durumunda default değerler
+        window.aboutUs = {
+            title: 'Bozkurt İnşaat Hakkında',
+            content: 'İçerik henüz eklenmedi.'
+        };
+        window.renderAboutUs();
+    });
+}
+
 // Proje Silme Fonksiyonu
 window.deleteProject = async (projectId) => {
     if (!confirm("Bu projeyi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!")) {
@@ -748,6 +826,59 @@ window.deleteInquiry = async (inquiryId) => {
         window.showMessage(`Hata: ${error.message}`, 'bg-red-600');
     }
 };
+
+        // ✨ YENİ: HAKKIMIZDA KAYDETME (Firestore)
+        window.saveAboutUs = async function() {
+            const title = document.getElementById('about-title').value.trim();
+            const content = document.getElementById('about-content').value.trim();
+            
+            if (!title || !content) {
+                window.showMessage('Başlık ve içerik alanları zorunludur!', 'bg-red-600');
+                return;
+            }
+            
+            if (!db || !auth.currentUser) {
+                window.showMessage('Veritabanı bağlantısı yok veya yetkiniz eksik.', 'bg-red-600');
+                return;
+            }
+            
+            try {
+                const aboutRef = doc(db, 'settings', 'aboutUs');
+                await setDoc(aboutRef, {
+                    title: title,
+                    content: content,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: auth.currentUser.email
+                });
+                
+                window.aboutUs = { title, content };
+                window.renderAboutUs();
+                
+                window.showMessage('✅ Hakkımızda bilgileri güncellendi!', 'bg-green-600');
+            } catch (error) {
+                console.error('Hakkımızda kaydetme hatası:', error);
+                window.showMessage(`❌ Hata: ${error.message}`, 'bg-red-600');
+            }
+        };
+        
+        // ✨ YENİ: HAKKIMIZDA RENDER (Public Site)
+        window.renderAboutUs = function() {
+            const titleEl = document.getElementById('about-title-display');
+            const contentEl = document.getElementById('about-content-display');
+            
+            if (titleEl) titleEl.textContent = window.aboutUs.title || 'Hakkımızda';
+            if (contentEl) contentEl.textContent = window.aboutUs.content || 'İçerik bekleniyor...';
+        };
+        
+        // ✨ YENİ: HAKKIMIZDA FORM DOLDUR (Admin Panel)
+        window.populateAboutForm = function() {
+            const titleInput = document.getElementById('about-title');
+            const contentInput = document.getElementById('about-content');
+            
+            if (titleInput) titleInput.value = window.aboutUs.title || '';
+            if (contentInput) contentInput.value = window.aboutUs.content || '';
+        };
+        
         // setupDragScroll fonksiyonu kaldırıldı - mobilde dikey grid kullanılıyor
         
         // Başlat
@@ -887,13 +1018,21 @@ window.deleteInquiry = async (inquiryId) => {
                 </div>
             </section>
     
-            <!-- Hakkımızda (About Us) Section -->
-            <section id="hakkimizda" class="py-16 md:py-24 bg-slate-900 container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="max-w-6xl mx-auto text-center">
-                    <div data-scroll-animate>
-                        <h3 class="text-4xl font-extrabold mb-4 text-white">Neden Bozkurt İnşaat?</h3>
+            <!-- Hakkımızda (About Us) Section - ✨ DİNAMİK -->
+            <section id="hakkimizda" class="py-16 md:py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-6xl mx-auto">
+                    <div data-scroll-animate class="text-center mb-12">
+                        <h3 id="about-title-display" class="text-4xl md:text-5xl font-extrabold mb-4 text-white elite-text">
+                            Neden Bozkurt İnşaat?
+                        </h3>
                         <div class="section-separator mx-auto"></div>
-                        <p class="text-xl text-gray-300 mt-6 leading-relaxed max-w-3xl mx-auto">20 yılı aşkın tecrübeyle, sadece binalar değil, gelecek nesillere miras kalacak **güvenli ve estetik** yaşam merkezleri inşa ediyoruz.</p>
+                    </div>
+                    
+                    <!-- Dinamik İçerik -->
+                    <div class="bg-slate-800/50 p-8 md:p-12 rounded-2xl border border-slate-700 shadow-2xl">
+                        <p id="about-content-display" class="text-lg md:text-xl text-gray-300 leading-relaxed whitespace-pre-wrap">
+                            20 yılı aşkın tecrübeyle, sadece binalar değil, gelecek nesillere miras kalacak güvenli ve estetik yaşam merkezleri inşa ediyoruz.
+                        </p>
                     </div>
                     
                     <!-- Özellik Kartları -->
@@ -1076,6 +1215,34 @@ window.deleteInquiry = async (inquiryId) => {
         </div>
         <button type="submit" class="w-full px-6 py-3 bg-yellow-400 text-slate-900 font-bold rounded-full shadow-lg transition duration-300 transform hover:scale-[1.01]">
             İletişim Bilgilerini Kaydet
+        </button>
+    </form>
+</div>
+
+<!-- ✨ YENİ: HAKKIMIZDA YÖNETİMİ -->
+<h2 class="text-2xl font-bold text-white mb-6 mt-12 border-t pt-6 border-slate-700 flex items-center gap-2">
+    <i data-lucide="info" class="w-7 h-7 elite-text"></i>
+    Hakkımızda İçerik Yönetimi
+</h2>
+<div class="bg-slate-900 rounded-xl shadow-2xl p-8">
+    <form id="about-form" onsubmit="event.preventDefault(); window.saveAboutUs()">
+        <div class="mb-6">
+            <label for="about-title" class="block text-sm font-medium text-gray-400 mb-2">Başlık</label>
+            <input type="text" id="about-title" required
+                   class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all"
+                   placeholder="Örn: Bozkurt İnşaat Hakkında">
+        </div>
+        
+        <div class="mb-6">
+            <label for="about-content" class="block text-sm font-medium text-gray-400 mb-2">İçerik</label>
+            <textarea id="about-content" rows="10" required
+                      class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all resize-none"
+                      placeholder="Hakkımızda içeriğini buraya yazın... (Firma tanıtımı, misyon, vizyon, değerler vb.)"></textarea>
+        </div>
+        
+        <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-900 font-bold rounded-full shadow-lg transition duration-300 transform hover:scale-[1.01] flex items-center justify-center gap-2">
+            <i data-lucide="save" class="w-5 h-5"></i>
+            Hakkımızda Bilgilerini Kaydet
         </button>
     </form>
 </div>
@@ -1736,8 +1903,15 @@ window.renderOngoingProjectCard = function(project) {
     const ongoing = sortedProjects.filter(p => p.status === 'ongoing');
 
     // Tamamlanan projeler
+    // ✅ PERFORMANS: innerHTML += yerine DocumentFragment
     if (completed.length > 0) {
-        completed.forEach(p => completedContainer.innerHTML += window.renderProjectCard(p));
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        completed.forEach(p => {
+            tempDiv.innerHTML = window.renderProjectCard(p);
+            fragment.appendChild(tempDiv.firstElementChild);
+        });
+        completedContainer.appendChild(fragment);
         noCompleted.classList.add('hidden');
     } else {
         completedContainer.innerHTML = '';
@@ -1746,14 +1920,21 @@ window.renderOngoingProjectCard = function(project) {
 
     // Devam eden projeler
     if (ongoing.length > 0) {
-        ongoing.forEach(p => ongoingContainer.innerHTML += window.renderOngoingProjectCard(p));
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        ongoing.forEach(p => {
+            tempDiv.innerHTML = window.renderOngoingProjectCard(p);
+            fragment.appendChild(tempDiv.firstElementChild);
+        });
+        ongoingContainer.appendChild(fragment);
         noOngoing.classList.add('hidden');
     } else {
         ongoingContainer.innerHTML = '';
         noOngoing.classList.remove('hidden');
     }
 
-    lucide.createIcons();
+    // ✅ PERFORMANS: RAF ile icon refresh
+    requestAnimationFrame(() => lucide.createIcons());
 }
 
 window.renderContactInfo = function() {
@@ -1999,7 +2180,11 @@ window.populateContactForm = function() {
             document.body.classList.add('modal-open');
             window.currentProjectCarousel = project;
             window.currentSlideIndex = 0;
-            window.updateCarouselDots();
+            
+            // ✨ CAROUSEL BAŞLAT - Initial position set et
+            setTimeout(() => {
+                window.goToSlide(0);
+            }, 50);
             
             // ✨ KLAVYE NAVIGASYONU EKLE
             window.setupKeyboardNav();
@@ -2067,12 +2252,18 @@ window.populateContactForm = function() {
             const carousel = document.getElementById('project-carousel');
             if (!carousel) return;
             
-            // Transform kullan (scroll yerine)
             const items = carousel.querySelectorAll('.carousel-item');
             if (items.length === 0) return;
             
+            // ✅ GPU Acceleration
+            carousel.style.willChange = 'transform';
             carousel.style.transform = `translateX(-${index * 100}%)`;
-            carousel.style.transition = 'transform 0.5s ease-in-out';
+            carousel.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Will-change'i temizle
+            setTimeout(() => {
+                carousel.style.willChange = 'auto';
+            }, 400);
             
             window.currentSlideIndex = index;
             window.updateCarouselDots();
@@ -2134,7 +2325,7 @@ window.populateContactForm = function() {
 
     // Firebase Auth'un hazır olmasını bekle
     if (!window.auth) {
-        statusText.textContent = "Başlatılıyor, lütfen bekleyin...";
+        statusText.textContent = "Firebase başlatılıyor, lütfen bekleyin...";
         
         let attempts = 0;
         while (!window.auth && attempts < 50) {
@@ -2143,7 +2334,7 @@ window.populateContactForm = function() {
         }
         
         if (!window.auth) {
-            statusText.textContent = "Hata: Başlatılamadı.";
+            statusText.textContent = "Hata: Firebase Auth başlatılamadı.";
             return;
         }
     }
@@ -2187,7 +2378,7 @@ window.populateContactForm = function() {
         if (error.code === 'auth/invalid-email') {
             message = "Geçersiz e-posta formatı.";
         } else if (error.code === 'auth/invalid-credential') {
-            message = "E-posta veya şifre hatalı. Kullanıcı bulunamadı.";
+            message = "E-posta veya şifre hatalı. Firebase'de bu kullanıcı bulunamadı.";
         } else if (error.code === 'auth/user-not-found') {
             message = "Bu e-posta ile kayıtlı kullanıcı bulunamadı.";
         } else if (error.code === 'auth/wrong-password') {
@@ -2593,7 +2784,7 @@ window.addEventListener('load', () => {
             loadingScreen.style.transition = 'opacity 0.5s ease';
             setTimeout(() => loadingScreen.remove(), 500);
         }
-    }, 800); // Firebase verilerinin yüklenmesi için ek süre
+    }, 300); // ✨ OPTİMİZE EDİLDİ: 800ms -> 300ms
 });
 
         
