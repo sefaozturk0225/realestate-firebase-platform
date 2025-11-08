@@ -71,6 +71,41 @@
             margin: 1rem 0;
             border-radius: 9999px;
         }
+        
+        /* Scrollbar Gizleme */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Line Clamp Utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1; /* ✅ yeni standart */
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; /* ✅ yeni standart */
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3; /* ✅ yeni standart */
+}
+
 
         /* Hero ve Genel Efektler */
         .hero-pin-bg {
@@ -85,37 +120,19 @@
         }
         .content-overlay { position: relative; z-index: 10; }
 
+        /* ✅ MOBİL: Dikey sıralama, normal scroll (kullanıcı dostu) */
         .horizontal-scroll-container {
-    display: flex;
-    cursor: grab;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -ms-overflow-style: none; 
-    scrollbar-width: none;
+    display: grid;
+    grid-template-columns: 1fr; /* Tek sütun - alt alta dizilim */
     gap: 1.5rem;
-    padding: 0 calc((100vw - (100vw - 3rem)) / 2); /* Ortalama için dinamik padding */
-    -webkit-overflow-scrolling: touch;
-    scroll-padding: calc((100vw - (100vw - 3rem)) / 2);
+    padding: 0 1rem;
+    overflow: visible; /* Yatay kaydırma YOK */
 }
 
-.horizontal-scroll-container:active {
-    cursor: grabbing;
-}
-
-.horizontal-scroll-container::-webkit-scrollbar {
-    display: none;
-}
-
-/* ✅ MOBİL: Tek kart - ekrana sığacak şekilde, TAM ORTALANMIŞ */
 .scroll-snap-card { 
-    flex: 0 0 calc(100vw - 4rem);
-    min-width: calc(100vw - 4rem);
-    max-width: 450px;
-    scroll-snap-align: center; /* TAM ORTADA */
-    scroll-snap-stop: always; /* Her kartta kesinlikle dur */
-    margin: 0 0.75rem; /* Ek boşluk */
+    width: 100%;
+    max-width: none;
+    margin: 0;
 }
 
 /* ✅ TABLET için 3 sütun GRID LAYOUT (768px - 1023px) */
@@ -674,96 +691,8 @@ window.deleteInquiry = async (inquiryId) => {
         window.showMessage(`Hata: ${error.message}`, 'bg-red-600');
     }
 };
-        window.setupDragScroll = function() {
-    const slider = document.getElementById('completed-projects-container');
-    if (!slider) return;
-
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    let velocity = 0;
-    let momentum;
-
-    // ✅ Touch olayları ekle
-    slider.addEventListener('touchstart', handleTouchStart, { passive: true });
-    slider.addEventListener('touchmove', handleTouchMove, { passive: false });
-    slider.addEventListener('touchend', handleTouchEnd);
-
-    slider.addEventListener('mousedown', (e) => {
-        isDown = true;
-        slider.style.cursor = 'grabbing';
-        startX = e.pageX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-        velocity = 0;
-        cancelMomentum();
-    });
-
-    slider.addEventListener('mouseleave', () => {
-        isDown = false;
-        slider.style.cursor = 'grab';
-    });
-
-    slider.addEventListener('mouseup', () => {
-        isDown = false;
-        slider.style.cursor = 'grab';
-        applyMomentum();
-    });
-
-    slider.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 2;
-        velocity = walk;
-        slider.scrollLeft = scrollLeft - walk;
-    });
-
-    // ✅ Touch fonksiyonları
-    let touchStartX = 0;
-    let touchScrollLeft = 0;
-
-    function handleTouchStart(e) {
-        touchStartX = e.touches[0].pageX;
-        touchScrollLeft = slider.scrollLeft;
-        cancelMomentum();
-    }
-
-    function handleTouchMove(e) {
-        if (e.touches.length > 1) return; // Multi-touch'ı yoksay
-        const touchX = e.touches[0].pageX;
-        const walk = (touchStartX - touchX) * 1.5;
-        slider.scrollLeft = touchScrollLeft + walk;
+        // setupDragScroll fonksiyonu kaldırıldı - mobilde dikey grid kullanılıyor
         
-        // Dikey kaydırmayı engelle
-        if (Math.abs(walk) > 10) {
-            e.preventDefault();
-        }
-    }
-
-    function handleTouchEnd(e) {
-        // Momentum efekti için velocity hesapla
-        applyMomentum();
-    }
-
-    function applyMomentum() {
-        cancelMomentum();
-        if (Math.abs(velocity) > 1) {
-            momentum = setInterval(() => {
-                slider.scrollLeft -= velocity;
-                velocity *= 0.95; // Yavaşlama faktörü
-                if (Math.abs(velocity) < 0.5) {
-                    cancelMomentum();
-                }
-            }, 16);
-        }
-    }
-
-    function cancelMomentum() {
-        if (momentum) {
-            clearInterval(momentum);
-        }
-    }
-};
         // Başlat
         window.addEventListener('load', window.initFirebase);
 
@@ -777,6 +706,28 @@ window.deleteInquiry = async (inquiryId) => {
     </script>
 </head>
 <body class="elite-bg text-gray-100">
+    
+    <!-- ✨ MODERN LOADING SCREEN -->
+    <div id="loading-screen" class="fixed inset-0 z-[9999] flex items-center justify-center elite-bg">
+        <div class="text-center">
+            <!-- Logo veya İsim -->
+            <div class="mb-8">
+                <h1 class="text-5xl font-black elite-text tracking-wider animate-pulse">BOZKURT İNŞAAT</h1>
+                <p class="text-gray-400 text-sm mt-2 tracking-widest">PRESTIJ VE KALİTE</p>
+            </div>
+            
+            <!-- Modern Spinner -->
+            <div class="flex justify-center mb-4">
+                <div class="relative w-16 h-16">
+                    <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+            
+            <!-- Loading Text -->
+            <p class="text-gray-400 text-sm animate-pulse">Projeler yükleniyor...</p>
+        </div>
+    </div>
     
     <!-- 1. ANA SİTE GÖRÜNÜMÜ -->
     <div id="main-view" class="visible-view">
@@ -1487,63 +1438,117 @@ window.deleteInquiry = async (inquiryId) => {
 window.renderProjectCard = function(project) {
     const isCompleted = project.status === 'completed';
     const yearText = project.year ? `${project.year}` : '';
-    const statusColor = isCompleted ? 'bg-green-600' : 'bg-yellow-600';
+    const statusColor = isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-yellow-500 to-amber-600';
     const statusText = isCompleted ? 'Tamamlandı' : 'Devam Ediyor';
     
     const imageUrl = project.images && project.images.length > 0 
         ? project.images[0] 
         : `https://placehold.co/400x300/475569/FACC15?text=${encodeURIComponent(project.title)}`;
+    
+    // Özelliklerden ilk 3'ünü göster
+    const featuresPreview = project.features && project.features.length > 0 
+        ? project.features.slice(0, 3).map(f => `
+            <li class="flex items-center text-xs text-gray-400">
+                <i data-lucide="check" class="w-3 h-3 mr-1.5 text-yellow-500 flex-shrink-0"></i>
+                <span>${f}</span>
+            </li>
+        `).join('')
+        : '';
 
     return `
-        <div class="scroll-snap-card rounded-xl bg-slate-900 shadow-2xl overflow-hidden transform hover:scale-[1.02] transition duration-300 border border-slate-700">
-            <div class="relative h-64 overflow-hidden">
+        <div class="scroll-snap-card group rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl overflow-hidden transform hover:scale-[1.03] hover:shadow-yellow-500/20 transition-all duration-500 border border-slate-700/50 hover:border-yellow-500/50">
+            <!-- Görsel -->
+            <div class="relative h-56 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10 opacity-60"></div>
                 <img src="${imageUrl}" 
                      alt="${project.title} Projesi Görseli" 
-                     class="w-full h-full object-cover transition duration-500 hover:opacity-90"
+                     class="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                      onerror="this.onerror=null; this.src='https://placehold.co/400x300/475569/FACC15?text=Görsel+Bulunamadı';"
                 >
-                <span class="absolute top-3 right-3 ${statusColor} text-xs font-bold text-white px-3 py-1 rounded-full shadow-md">${statusText}</span>
+                <span class="absolute top-4 right-4 ${statusColor} text-xs font-bold text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm z-20">${statusText}</span>
+                ${project.images && project.images.length > 1 ? `<span class="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-xs text-white px-2 py-1 rounded-full z-20"><i data-lucide="images" class="w-3 h-3 inline mr-1"></i>${project.images.length} Görsel</span>` : ''}
             </div>
-            <div class="p-6">
-                <h4 class="text-2xl font-bold text-white elite-text mb-2">${project.title}</h4>
-                <p class="text-sm text-gray-400 mb-3 flex items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-yellow-500"></i> ${project.location || 'Konum Belirtilmemiş'}${yearText ? ` (${yearText})` : ''}
-                </p>
-                <p class="text-gray-300 text-sm mb-4 line-clamp-3">${project.description}</p>
-                <button onclick="window.showProjectModal('${project.id}')" class="text-sm text-yellow-500 font-semibold hover:text-yellow-400 transition duration-200 flex items-center">
-                    Detayları Gör <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+            
+            <!-- İçerik -->
+            <div class="p-6 space-y-4">
+                <!-- Başlık ve Konum -->
+                <div>
+                    <h4 class="text-xl font-extrabold text-white elite-text mb-2 line-clamp-1 group-hover:text-yellow-400 transition-colors">${project.title}</h4>
+                    <p class="text-xs text-gray-400 flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-yellow-500"></i> 
+                        <span>${project.location || 'Konum Belirtilmemiş'}${yearText ? ` • ${yearText}` : ''}</span>
+                    </p>
+                </div>
+                
+                <!-- Açıklama -->
+                <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${project.description}</p>
+                
+                <!-- Özellikler Önizleme -->
+                ${featuresPreview ? `<ul class="space-y-1.5 border-t border-slate-700/50 pt-3">${featuresPreview}</ul>` : ''}
+                
+                <!-- Detay Butonu -->
+                <button onclick="window.showProjectModal('${project.id}')" class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-900 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-yellow-500/50 transform hover:-translate-y-0.5">
+                    <span>Detayları Gör</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
     `;
 }
 
-// ✅ YENİ: Devam eden projeler için (grid layout)
+// ✅ YENİ: Devam eden projeler için (grid layout) - Modern Tasarım
 window.renderOngoingProjectCard = function(project) {
     const yearText = project.year ? `${project.year}` : '';
     
     const imageUrl = project.images && project.images.length > 0 
         ? project.images[0] 
         : `https://placehold.co/400x300/475569/FACC15?text=${encodeURIComponent(project.title)}`;
+    
+    // Özelliklerden ilk 3'ünü göster
+    const featuresPreview = project.features && project.features.length > 0 
+        ? project.features.slice(0, 3).map(f => `
+            <li class="flex items-center text-xs text-gray-400">
+                <i data-lucide="check" class="w-3 h-3 mr-1.5 text-yellow-500 flex-shrink-0"></i>
+                <span>${f}</span>
+            </li>
+        `).join('')
+        : '';
 
     return `
-        <div class="rounded-xl bg-slate-900 shadow-2xl overflow-hidden transform hover:scale-[1.02] transition duration-300 border border-slate-700">
-            <div class="relative h-64 overflow-hidden">
+        <div class="group rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl overflow-hidden transform hover:scale-[1.03] hover:shadow-amber-500/20 transition-all duration-500 border border-slate-700/50 hover:border-amber-500/50">
+            <!-- Görsel -->
+            <div class="relative h-56 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10 opacity-60"></div>
                 <img src="${imageUrl}" 
                      alt="${project.title} Projesi Görseli" 
-                     class="w-full h-full object-cover transition duration-500 hover:opacity-90"
+                     class="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                      onerror="this.onerror=null; this.src='https://placehold.co/400x300/475569/FACC15?text=Görsel+Bulunamadı';"
                 >
-                <span class="absolute top-3 right-3 bg-yellow-600 text-xs font-bold text-white px-3 py-1 rounded-full shadow-md">Devam Ediyor</span>
+                <span class="absolute top-4 right-4 bg-gradient-to-r from-yellow-500 to-amber-600 text-xs font-bold text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm z-20 animate-pulse">Devam Ediyor</span>
+                ${project.images && project.images.length > 1 ? `<span class="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-xs text-white px-2 py-1 rounded-full z-20"><i data-lucide="images" class="w-3 h-3 inline mr-1"></i>${project.images.length} Görsel</span>` : ''}
             </div>
-            <div class="p-6">
-                <h4 class="text-2xl font-bold text-white elite-text mb-2">${project.title}</h4>
-                <p class="text-sm text-gray-400 mb-3 flex items-center">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-yellow-500"></i> ${project.location || 'Konum Belirtilmemiş'}${yearText ? ` (${yearText})` : ''}
-                </p>
-                <p class="text-gray-300 text-sm mb-4 line-clamp-3">${project.description}</p>
-                <button onclick="window.showProjectModal('${project.id}')" class="text-sm text-yellow-500 font-semibold hover:text-yellow-400 transition duration-200 flex items-center">
-                    Detayları Gör <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+            
+            <!-- İçerik -->
+            <div class="p-6 space-y-4">
+                <!-- Başlık ve Konum -->
+                <div>
+                    <h4 class="text-xl font-extrabold text-white elite-text mb-2 line-clamp-1 group-hover:text-yellow-400 transition-colors">${project.title}</h4>
+                    <p class="text-xs text-gray-400 flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-yellow-500"></i> 
+                        <span>${project.location || 'Konum Belirtilmemiş'}${yearText ? ` • ${yearText}` : ''}</span>
+                    </p>
+                </div>
+                
+                <!-- Açıklama -->
+                <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${project.description}</p>
+                
+                <!-- Özellikler Önizleme -->
+                ${featuresPreview ? `<ul class="space-y-1.5 border-t border-slate-700/50 pt-3">${featuresPreview}</ul>` : ''}
+                
+                <!-- Detay Butonu -->
+                <button onclick="window.showProjectModal('${project.id}')" class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-900 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/50 transform hover:-translate-y-0.5">
+                    <span>Detayları Gör</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
@@ -1632,7 +1637,7 @@ window.populateContactForm = function() {
     if (emailInput) emailInput.value = window.contactInfo.email || '';
 };
 
-        // Proje Detay Modalını Göster (GÜNCELLENDİ)
+        // Proje Detay Modalını Göster (GÜNCELLENDİ - Modern Tasarım)
         window.showProjectModal = function(id) {
             const project = window.projects.find(p => p.id === id);
             if (!project) return;
@@ -1644,74 +1649,160 @@ window.populateContactForm = function() {
     ? `
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-4 text-slate-300">
         ${project.features.map(f => `
-            <li class="flex items-center text-sm">
-                <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-yellow-400 flex-shrink-0"></i>
+            <li class="flex items-center text-sm group">
+                <i data-lucide="check-circle" class="w-5 h-5 mr-3 text-yellow-400 flex-shrink-0 group-hover:scale-110 transition-transform"></i>
                 <span class="font-medium">${f}</span>
             </li>
         `).join('')}
     </ul>
     `
-    : '<p class="text-gray-500 text-sm mt-4">Özellikler henüz eklenmemiş.</p>';
+    : '<p class="text-gray-500 text-sm mt-4 italic">Özellikler henüz eklenmemiş.</p>';
             
-            // YENİ: Proje İletişim Bilgileri
-            const contactHtml = (project.contact_person && project.contact_phone) ? `
-                <div class="mt-8 pt-6 border-t border-slate-700">
-                    <h3 class="text-2xl font-bold text-white elite-text mb-4">Proje Satış İletişim Noktası</h3>
-                    <p class="text-gray-300 mb-2 flex items-center"><i data-lucide="user" class="w-5 h-5 mr-3 text-yellow-500"></i> Yetkili: ${project.contact_person}</p>
-                    <p class="text-gray-300 mb-2 flex items-center"><i data-lucide="phone" class="w-5 h-5 mr-3 text-yellow-500"></i> Telefon: <a href="tel:${project.contact_phone}" class="hover:underline">${project.contact_phone}</a></p>
-                    ${project.contact_email ? `<p class="text-gray-300 flex items-center"><i data-lucide="mail" class="w-5 h-5 mr-3 text-yellow-500"></i> E-posta: <a href="mailto:${project.contact_email}" class="hover:underline">${project.contact_email}</a></p>` : ''}
+            // ✨ YENİ: Proje İletişim Bilgileri - Daha Şık ve Görünür
+            const contactHtml = (project.contact_person || project.contact_phone || project.contact_email) ? `
+                <div class="mt-8 p-6 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-yellow-500/30 shadow-xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="phone-call" class="w-6 h-6 text-slate-900"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-white elite-text">Proje İletişim</h3>
+                            <p class="text-sm text-gray-400">Detaylı bilgi ve satış için iletişime geçin</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        ${project.contact_person ? `
+                        <div class="flex items-center gap-4 p-3 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-colors">
+                            <i data-lucide="user" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-xs text-gray-400">Yetkili Kişi</p>
+                                <p class="text-white font-semibold">${project.contact_person}</p>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${project.contact_phone ? `
+                        <a href="tel:${project.contact_phone}" class="flex items-center gap-4 p-3 bg-slate-700/30 rounded-xl hover:bg-yellow-500/10 hover:border-yellow-500/50 border border-transparent transition-all group">
+                            <i data-lucide="phone" class="w-5 h-5 text-yellow-400 flex-shrink-0 group-hover:scale-110 transition-transform"></i>
+                            <div>
+                                <p class="text-xs text-gray-400">Telefon</p>
+                                <p class="text-white font-semibold group-hover:text-yellow-400 transition-colors">${project.contact_phone}</p>
+                            </div>
+                        </a>
+                        ` : ''}
+                        
+                        ${project.contact_email ? `
+                        <a href="mailto:${project.contact_email}" class="flex items-center gap-4 p-3 bg-slate-700/30 rounded-xl hover:bg-yellow-500/10 hover:border-yellow-500/50 border border-transparent transition-all group">
+                            <i data-lucide="mail" class="w-5 h-5 text-yellow-400 flex-shrink-0 group-hover:scale-110 transition-transform"></i>
+                            <div>
+                                <p class="text-xs text-gray-400">E-posta</p>
+                                <p class="text-white font-semibold group-hover:text-yellow-400 transition-colors">${project.contact_email}</p>
+                            </div>
+                        </a>
+                        ` : ''}
+                    </div>
                 </div>
             ` : '';
 
-            // Carousel (Görsel Döngüsü)
+            // ✨ Carousel (Görsel Döngüsü) - Geliştirilmiş
             const carouselImages = (project.images && project.images.length > 0)
                 ? project.images.map((imgSrc, index) => `
                     <div class="carousel-item w-full flex-shrink-0 snap-center" data-index="${index}">
                         <img src="${imgSrc}" 
                             alt="${project.title} Görsel ${index + 1}" 
-                            class="w-full h-96 object-cover rounded-xl shadow-lg"
+                            class="w-full h-96 object-cover rounded-2xl shadow-2xl"
                             onerror="this.onerror=null; this.src='https://placehold.co/800x400/475569/FACC15?text=Görsel+Bulunamadı';"
                         >
                     </div>
                   `).join('')
-                : `<div class="carousel-item w-full flex-shrink-0 snap-center"><img src="https://placehold.co/800x400/475569/FACC15?text=${encodeURIComponent('Görsel Yok')}" alt="Görsel Yok" class="w-full h-96 object-cover rounded-xl shadow-lg"></div>`;
+                : `<div class="carousel-item w-full flex-shrink-0 snap-center"><img src="https://placehold.co/800x400/475569/FACC15?text=${encodeURIComponent('Görsel Yok')}" alt="Görsel Yok" class="w-full h-96 object-cover rounded-2xl shadow-2xl"></div>`;
+            
+            // ✨ YENİ: Proje Resimleri Galeri Bölümü (Thumbnail Grid)
+            const thumbnailGallery = (project.images && project.images.length > 1) ? `
+                <div class="mt-8 border-t border-slate-700 pt-8">
+                    <h3 class="text-2xl font-bold text-white elite-text mb-4 flex items-center gap-2">
+                        <i data-lucide="images" class="w-6 h-6 text-yellow-400"></i>
+                        Proje Görselleri (${project.images.length})
+                    </h3>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                        ${project.images.map((imgSrc, index) => `
+                            <div onclick="window.goToSlide(${index})" class="cursor-pointer group relative aspect-square rounded-lg overflow-hidden border-2 border-slate-700 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                <img src="${imgSrc}" 
+                                    alt="Thumbnail ${index + 1}" 
+                                    class="w-full h-full object-cover transition-all duration-300 group-hover:brightness-75"
+                                    onerror="this.onerror=null; this.src='https://placehold.co/150x150/475569/FACC15?text=${index+1}';"
+                                >
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                                    <i data-lucide="maximize-2" class="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
 
             content.innerHTML = `
-                <div class="mb-6">
-                    <h1 id="modal-title" class="text-4xl font-extrabold elite-text mb-2">${project.title}</h1>
-                    <p class="text-xl text-gray-300 mb-4">${project.location || 'Konum Belirtilmemiş'} | Teslim Yılı: ${project.year || 'N/A'}</p>
-                </div>
-                
-                <!-- Görsel Carousel -->
-                <div class="relative mb-8">
-                    <div id="project-carousel" class="flex overflow-x-auto snap-x snap-mandatory rounded-xl transition duration-300 ease-in-out">
-                        ${carouselImages}
+                <div class="space-y-8">
+                    <!-- Başlık -->
+                    <div class="text-center border-b border-slate-700 pb-6">
+                        <h1 id="modal-title" class="text-4xl md:text-5xl font-extrabold elite-text mb-3">${project.title}</h1>
+                        <p class="text-lg text-gray-300 flex items-center justify-center gap-4 flex-wrap">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-yellow-400"></i>
+                                ${project.location || 'Konum Belirtilmemiş'}
+                            </span>
+                            <span class="text-gray-500">•</span>
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-5 h-5 text-yellow-400"></i>
+                                Teslim: ${project.year || 'Belirtilmemiş'}
+                            </span>
+                        </p>
                     </div>
-                    <!-- Navigasyon Butonları -->
-                    <button onclick="window.moveCarousel('prev')" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-white hover:bg-opacity-75 transition z-10">
-                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
-                    </button>
-                    <button onclick="window.moveCarousel('next')" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 p-3 rounded-full text-white hover:bg-opacity-75 transition z-10">
-                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
-                    </button>
-                    <div id="carousel-dots" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-                        ${project.images && project.images.length > 0 ? project.images.map((_, index) => `<span class="dot w-2 h-2 bg-gray-400 rounded-full cursor-pointer transition duration-300 ${index === 0 ? 'bg-yellow-500' : ''}" onclick="window.goToSlide(${index})"></span>`).join('') : ''}
+                    
+                    <!-- Görsel Carousel -->
+                    <div class="relative">
+                        <div id="project-carousel" class="flex overflow-x-auto snap-x snap-mandatory rounded-2xl scrollbar-hide">
+                            ${carouselImages}
+                        </div>
+                        <!-- Navigasyon Butonları -->
+                        ${project.images && project.images.length > 1 ? `
+                        <button onclick="window.moveCarousel('prev')" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/70 backdrop-blur-sm p-3 rounded-full text-white hover:bg-yellow-500 hover:text-slate-900 transition-all z-10 shadow-xl">
+                            <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                        </button>
+                        <button onclick="window.moveCarousel('next')" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/70 backdrop-blur-sm p-3 rounded-full text-white hover:bg-yellow-500 hover:text-slate-900 transition-all z-10 shadow-xl">
+                            <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        </button>
+                        <div id="carousel-dots" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                            ${project.images.map((_, index) => `<span class="dot w-3 h-3 bg-gray-400 rounded-full cursor-pointer transition-all duration-300 hover:scale-125 ${index === 0 ? 'bg-yellow-500 scale-110' : ''}" onclick="window.goToSlide(${index})"></span>`).join('')}
+                        </div>
+                        ` : ''}
                     </div>
-                </div>
 
-                <!-- Detaylı Açıklama -->
-                <div class="mb-6 border-b border-slate-700 pb-6">
-                    <h3 class="text-2xl font-bold text-white elite-text mb-4">Proje Detayları</h3>
-                    <p class="text-gray-400 leading-relaxed whitespace-pre-wrap">${project.detailedDescription || project.description || 'Detaylı açıklama mevcut değil.'}</p>
-                </div>
+                    <!-- Detaylı Açıklama -->
+                    <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                        <h3 class="text-2xl font-bold text-white elite-text mb-4 flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-6 h-6 text-yellow-400"></i>
+                            Proje Detayları
+                        </h3>
+                        <p class="text-gray-400 leading-relaxed whitespace-pre-wrap">${project.detailedDescription || project.description || 'Detaylı açıklama mevcut değil.'}</p>
+                    </div>
 
-                <!-- Özellikler -->
-                <div class="${contactHtml ? 'border-b border-slate-700 pb-6' : ''}">
-                    <h3 class="text-2xl font-bold text-white elite-text mb-4">Öne Çıkan Özellikler</h3>
-                    <div>${featuresHtml}</div>
+                    <!-- Özellikler -->
+                    <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                        <h3 class="text-2xl font-bold text-white elite-text mb-4 flex items-center gap-2">
+                            <i data-lucide="star" class="w-6 h-6 text-yellow-400"></i>
+                            Öne Çıkan Özellikler
+                        </h3>
+                        <div>${featuresHtml}</div>
+                    </div>
+                    
+                    <!-- Thumbnail Galeri -->
+                    ${thumbnailGallery}
+                    
+                    <!-- İrtibat Bilgileri -->
+                    ${contactHtml}
                 </div>
-                
-                ${contactHtml}
             `;
             
             lucide.createIcons();
@@ -2200,14 +2291,24 @@ window.addEventListener('load', () => {
     window.setupMobileMenu();
     window.setupAdminAccess(); 
     window.setupDragAndDrop();
-    window.setupDragScroll();
+    // setupDragScroll kaldırıldı - mobilde artık dikey grid var
     
     // ✅ EKLE: İletişim bilgilerini ilk yüklemede de render et
     if (window.contactInfo && Object.keys(window.contactInfo).length > 0) {
         window.renderContactInfo();
     }
     
-    lucide.createIcons(); 
+    lucide.createIcons();
+    
+    // ✨ Loading screen'i kapat (veriler yüklendikten sonra)
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => loadingScreen.remove(), 500);
+        }
+    }, 800); // Firebase verilerinin yüklenmesi için ek süre
 });
 
         
