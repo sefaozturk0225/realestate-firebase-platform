@@ -205,15 +205,21 @@
     margin: 0;
 }
 
-/* ✅ MOBİL: Kartlar daha geniş (360px minimum) */
+/* ✅ MOBİL: Kartlar daha geniş ve padding minimal */
 @media (max-width: 767px) {
     .horizontal-scroll-container {
-        padding: 0 0.75rem;
+        padding: 0 0.5rem; /* 0.75rem -> 0.5rem */
     }
     
     .scroll-snap-card,
     .horizontal-scroll-container > div {
         min-width: 100%;
+    }
+    
+    /* Kart iç padding'lerini koruyalım ama genişliği maksimize edelim */
+    .scroll-snap-card {
+        margin: 0 auto;
+        max-width: 100%;
     }
 }
 
@@ -384,9 +390,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, setLogLevel, addDoc, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, setLogLevel, addDoc, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         setLogLevel('debug');
+        window.writeBatch = writeBatch;
+        window.doc = doc;
 
         const firebaseConfigRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -420,6 +428,10 @@
         const PROJECT_COLLECTION_PATH = `projects`;
         const INQUIRY_COLLECTION_PATH = `inquiries`;
         const CONTACT_INFO_PATH = `contact_info`;
+
+        window.PROJECT_COLLECTION_PATH = PROJECT_COLLECTION_PATH;
+        window.INQUIRY_COLLECTION_PATH = INQUIRY_COLLECTION_PATH;
+        window.CONTACT_INFO_PATH = CONTACT_INFO_PATH;
         
         let db, auth;
         let projectsRef;
@@ -896,26 +908,7 @@ window.deleteInquiry = async (inquiryId) => {
 <body class="elite-bg text-gray-100">
     
     <!-- ✨ MODERN LOADING SCREEN -->
-    <div id="loading-screen" class="fixed inset-0 z-[9999] flex items-center justify-center elite-bg">
-        <div class="text-center">
-            <!-- Logo veya İsim -->
-            <div class="mb-8">
-                <h1 class="text-5xl font-black elite-text tracking-wider animate-pulse">BOZKURT İNŞAAT</h1>
-                <p class="text-gray-400 text-sm mt-2 tracking-widest">PRESTIJ VE KALİTE</p>
-            </div>
-            
-            <!-- Modern Spinner -->
-            <div class="flex justify-center mb-4">
-                <div class="relative w-16 h-16">
-                    <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
-                    <div class="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-            </div>
-            
-            <!-- Loading Text -->
-            <p class="text-gray-400 text-sm animate-pulse">Projeler yükleniyor...</p>
-        </div>
-    </div>
+    <!-- ✅ Loading screen kaldırıldı - Projeler bölümünde gösterilecek -->
     
     <!-- 1. ANA SİTE GÖRÜNÜMÜ -->
     <div id="main-view" class="visible-view">
@@ -985,7 +978,7 @@ window.deleteInquiry = async (inquiryId) => {
                 </div>
     
                 <!-- Tamamlanan Projeler Listesi -->
-<div class="px-4 sm:px-6 lg:px-8">
+<div class="px-2 sm:px-6 lg:px-8">
     <div class="text-center mb-8 mt-12">
         <h4 data-scroll-animate data-scroll-delay="100" class="text-3xl font-extrabold text-white mb-2 elite-text">Tamamlanan Projeler</h4>
         <div data-scroll-animate data-scroll-delay="200" class="section-separator mx-auto w-16"></div>
@@ -994,7 +987,13 @@ window.deleteInquiry = async (inquiryId) => {
     <!-- ✅ GRID LAYOUT CONTAINER -->
     <!-- HORIZONTAL SCROLL CONTAINER START -->
 <div id="completed-projects-container" class="horizontal-scroll-container pb-6">
-    <p class="text-center text-gray-500 p-4">Projeler yükleniyor...</p>
+    <div class="flex flex-col items-center justify-center py-12">
+        <div class="relative w-16 h-16 mb-4">
+            <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p class="text-gray-400 text-lg animate-pulse">Projeler yükleniyor...</p>
+    </div>
 </div>
 <!-- HORIZONTAL SCROLL CONTAINER END -->
 </div>
@@ -1004,13 +1003,19 @@ window.deleteInquiry = async (inquiryId) => {
 </div>  
 
                 <!-- Devam Eden Projeler Listesi -->
-                <div class="px-4 sm:px-6 lg:px-8">
+                <div class="px-2 sm:px-6 lg:px-8">
                     <div class="text-center mt-16 mb-8">
                         <h4 data-scroll-animate data-scroll-delay="100" class="text-3xl font-extrabold text-white mb-2 elite-text">Devam Eden Projeler</h4>
                         <div data-scroll-animate data-scroll-delay="200" class="section-separator mx-auto w-16"></div>
                     </div>
                     <div id="ongoing-projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-                        <!-- Proje Kartları buraya JS ile yüklenecek -->
+                        <div class="col-span-full flex flex-col items-center justify-center py-12">
+                            <div class="relative w-16 h-16 mb-4">
+                                <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                                <div class="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                            <p class="text-gray-400 text-lg animate-pulse">Projeler yükleniyor...</p>
+                        </div>
                     </div>
                     <div id="no-ongoing-projects" class="text-center text-gray-500 mt-8 hidden p-4 bg-slate-800 rounded-lg max-w-md mx-auto">
                         Şu anda devam eden bir projemiz bulunmamaktadır.
@@ -1701,12 +1706,14 @@ window.renderProjectCard = function(project) {
                     ${project.images && project.images.length > 0 
                         ? project.images.map((img, idx) => `
                             <img src="${img}" 
+                                 loading="${idx === 0 ? 'eager' : 'lazy'}"
+                                 decoding="async"
                                  alt="${project.title} - Görsel ${idx + 1}" 
-                                 class="w-full h-full object-cover flex-shrink-0 transition-all duration-700"
+                                 class="w-full h-full object-cover flex-shrink-0"
                                  onerror="this.onerror=null; this.src='https://placehold.co/400x300/475569/FACC15?text=Görsel+${idx+1}';"
                             >
                         `).join('')
-                        : `<img src="${imageUrl}" alt="${project.title}" class="w-full h-full object-cover flex-shrink-0">`
+                        : `<img src="${imageUrl}" loading="eager" decoding="async" alt="${project.title}" class="w-full h-full object-cover flex-shrink-0">`
                     }
                 </div>
                 
@@ -1827,12 +1834,14 @@ window.renderOngoingProjectCard = function(project) {
                     ${project.images && project.images.length > 0 
                         ? project.images.map((img, idx) => `
                             <img src="${img}" 
+                                 loading="${idx === 0 ? 'eager' : 'lazy'}"
+                                 decoding="async"
                                  alt="${project.title} - Görsel ${idx + 1}" 
-                                 class="w-full h-full object-cover flex-shrink-0 transition-all duration-700"
+                                 class="w-full h-full object-cover flex-shrink-0"
                                  onerror="this.onerror=null; this.src='https://placehold.co/400x300/475569/FACC15?text=Görsel+${idx+1}';"
                             >
                         `).join('')
-                        : `<img src="${imageUrl}" alt="${project.title}" class="w-full h-full object-cover flex-shrink-0">`
+                        : `<img src="${imageUrl}" loading="eager" decoding="async" alt="${project.title}" class="w-full h-full object-cover flex-shrink-0">`
                     }
                 </div>
                 
@@ -2074,13 +2083,15 @@ window.populateContactForm = function() {
                 ? project.images.map((imgSrc, index) => `
                     <div class="carousel-item w-full flex-shrink-0" data-index="${index}">
                         <img src="${imgSrc}" 
+                            loading="${index === 0 ? 'eager' : 'lazy'}"
+                            decoding="async"
                             alt="${project.title} Görsel ${index + 1}" 
                             class="w-full h-96 object-cover rounded-2xl shadow-2xl"
                             onerror="this.onerror=null; this.src='https://placehold.co/800x400/475569/FACC15?text=Görsel+Bulunamadı';"
                         >
                     </div>
                   `).join('')
-                : `<div class="carousel-item w-full flex-shrink-0"><img src="https://placehold.co/800x400/475569/FACC15?text=${encodeURIComponent('Görsel Yok')}" alt="Görsel Yok" class="w-full h-96 object-cover rounded-2xl shadow-2xl"></div>`;
+                : `<div class="carousel-item w-full flex-shrink-0"><img src="https://placehold.co/800x400/475569/FACC15?text=${encodeURIComponent('Görsel Yok')}" loading="eager" alt="Görsel Yok" class="w-full h-96 object-cover rounded-2xl shadow-2xl"></div>`;
             
             // ✨ Thumbnail Galerisi
             const thumbnailGallery = (project.images && project.images.length > 1) ? `
@@ -2093,6 +2104,8 @@ window.populateContactForm = function() {
                         ${project.images.map((imgSrc, index) => `
                             <div onclick="window.goToSlide(${index})" class="cursor-pointer group relative aspect-square rounded-lg overflow-hidden border-2 border-slate-700 hover:border-yellow-500 transition-all duration-300 transform hover:scale-105">
                                 <img src="${imgSrc}" 
+                                    loading="lazy"
+                                    decoding="async"
                                     alt="Thumbnail ${index + 1}" 
                                     class="w-full h-full object-cover transition-all duration-300 group-hover:brightness-75"
                                     onerror="this.onerror=null; this.src='https://placehold.co/150x150/475569/FACC15?text=${index+1}';"
@@ -2126,7 +2139,7 @@ window.populateContactForm = function() {
                     
                     <!-- Görsel Carousel -->
                     <div class="relative">
-                        <div id="project-carousel" class="flex overflow-hidden rounded-2xl">
+                        <div id="project-carousel" class="flex overflow-hidden rounded-2xl w-full">
                             ${carouselImages}
                         </div>
                         <!-- Navigasyon Butonları -->
@@ -2478,42 +2491,70 @@ window.populateContactForm = function() {
         }
         
         // ✨ YENİ: Proje Sıralama Fonksiyonu
+        // ✨ PROJE SIRALAMA - Firestore ile Çalışır Halde
         window.moveProject = async function(projectId, direction) {
             const projectIndex = window.projects.findIndex(p => p.id === projectId);
             if (projectIndex === -1) return;
+            
+            if (!db || !auth.currentUser) {
+                window.showMessage('Veritabanı bağlantısı yok veya yetkiniz eksik.', 'bg-red-600');
+                return;
+            }
             
             // Order değerlerini güncelle
             const sortedProjects = [...window.projects].sort((a, b) => (a.order || 999) - (b.order || 999));
             const currentIndex = sortedProjects.findIndex(p => p.id === projectId);
             
+            let project1, project2;
+            
             if (direction === 'up' && currentIndex > 0) {
                 // Yukarı taşı
-                const temp = sortedProjects[currentIndex].order || currentIndex;
-                sortedProjects[currentIndex].order = sortedProjects[currentIndex - 1].order || (currentIndex - 1);
-                sortedProjects[currentIndex - 1].order = temp;
+                project1 = sortedProjects[currentIndex];
+                project2 = sortedProjects[currentIndex - 1];
+                
+                const temp = project1.order !== undefined ? project1.order : currentIndex;
+                project1.order = project2.order !== undefined ? project2.order : (currentIndex - 1);
+                project2.order = temp;
             } else if (direction === 'down' && currentIndex < sortedProjects.length - 1) {
                 // Aşağı taşı
-                const temp = sortedProjects[currentIndex].order || currentIndex;
-                sortedProjects[currentIndex].order = sortedProjects[currentIndex + 1].order || (currentIndex + 1);
-                sortedProjects[currentIndex + 1].order = temp;
+                project1 = sortedProjects[currentIndex];
+                project2 = sortedProjects[currentIndex + 1];
+                
+                const temp = project1.order !== undefined ? project1.order : currentIndex;
+                project1.order = project2.order !== undefined ? project2.order : (currentIndex + 1);
+                project2.order = temp;
             } else {
                 return; // Hareket edilemez
             }
             
-            // Firebase'e kaydet
+            // Firestore'a kaydet
             try {
-                const updates = {};
-                sortedProjects.forEach(project => {
-                    updates[`/projects/${project.id}/order`] = project.order;
-                });
-                
-                await window.database.ref().update(updates);
-                window.showMessage('Proje sıralaması güncellendi!', 'bg-green-600');
-            } catch (error) {
-                console.error('Sıralama hatası:', error);
-                window.showMessage('Sıralama güncellenirken hata oluştu.', 'bg-red-600');
-            }
-        }
+    const batch = window.writeBatch(db);
+    
+    const ref1 = window.doc(db, window.PROJECT_COLLECTION_PATH, project1.id);
+    batch.update(ref1, { order: project1.order });
+    
+    const ref2 = window.doc(db, window.PROJECT_COLLECTION_PATH, project2.id);
+    batch.update(ref2, { order: project2.order });
+    
+    await batch.commit();
+    
+    // Local state'i güncelle
+    window.projects = window.projects.map(p => {
+        if (p.id === project1.id) return { ...p, order: project1.order };
+        if (p.id === project2.id) return { ...p, order: project2.order };
+        return p;
+    });
+    
+    // Tabloyu yeniden render et
+    window.renderAdminProjectTable();
+    
+    window.showMessage('✅ Proje sıralaması güncellendi!', 'bg-green-600');
+} catch (error) {
+    console.error('Sıralama hatası:', error);
+    window.showMessage(`❌ Hata: ${error.message}`, 'bg-red-600');
+}
+        };
 
         window.renderAdminInquiryTable = function() {
     const tableBody = document.getElementById('admin-inquiry-table-body');
@@ -2776,18 +2817,10 @@ window.addEventListener('load', () => {
     
     lucide.createIcons();
     
-    // ✨ Loading screen'i kapat (veriler yüklendikten sonra)
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.transition = 'opacity 0.5s ease';
-            setTimeout(() => loadingScreen.remove(), 500);
-        }
-    }, 300); // ✨ OPTİMİZE EDİLDİ: 800ms -> 300ms
+    // ✅ Ana loading screen kaldırıldı - artık gerekli değil
 });
-
         
     </script>
 </body>
 </html>
+        
