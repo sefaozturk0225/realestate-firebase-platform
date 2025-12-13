@@ -118,6 +118,13 @@ html {
     border-radius: 9999px;
 }
 
+/* 🚀 GPU Acceleration - Kritik elementler için */
+.hero-pin-bg,
+.modal,
+.card-hover {
+    will-change: auto; /* Sürekli will-change yerine otomatik */
+}
+
 /* Scrollbar Gizleme */
 .scrollbar-hide {
     -ms-overflow-style: none;
@@ -195,8 +202,17 @@ html {
     left: 0;
     width: 100%;
     height: 100vh;
+    height: 100dvh; /* Mobil için dinamik viewport height */
     background-color: #1E293B;
     z-index: -1;
+}
+
+/* 🔧 MOBİL FIX - Position fixed yerine absolute kullan */
+@media (max-width: 768px) {
+    .hero-pin-bg {
+        position: absolute;
+        height: 100%;
+    }
 }
 
 .hero-vignette {
@@ -215,22 +231,37 @@ html {
     z-index: 10;
 }
 
-/* ✅ PERFORMANS BOOST - Mobilde hızlandırılmış geçişler */
+/* ✅ PERFORMANS BOOST - Sadece desktop'ta seçici transition */
 @media (min-width: 769px) {
-    * {
-        transition-duration: 0.15s !important;
+    /* ❌ KALDIRILDI: * { transition-duration: 0.15s !important; } */
+    /* ✅ Sadece interaktif elementlerde transition */
+    button:not(.remove-image-btn),
+    a,
+    input:focus,
+    textarea:focus,
+    select:focus {
+        transition: opacity 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
 }
 
 /* ✅ Sadece önemli elementlerde smooth transition */
-.card-hover,
-.modal,
+.card-hover {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.modal {
+    transition: opacity 0.3s ease;
+}
+
 button:not(.remove-image-btn),
-a,
+a {
+    transition: opacity 0.2s ease;
+}
+
 input,
 textarea,
 select {
-    transition-duration: 0.2s !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* ✅ YENİ - Basit Hover Efekti (Scale YOK) */
@@ -265,16 +296,47 @@ img {
 
 /* 🚀 MOBİL OPTİMİZASYON - Gecikmeleri azalt */
 @media (max-width: 768px) {
+    /* ✅ Scroll animasyonlarını tamamen devre dışı bırak */
+    [data-scroll-animate] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+    
+    /* ✅ Delay'leri sıfırla */
     [data-scroll-delay="100"],
     [data-scroll-delay="200"], 
     [data-scroll-delay="400"] {
         animation-delay: 0ms !important;
     }
     
+    /* ✅ Backdrop filter'ı kaldır (performans) */
+    .modern-header,
+    .hero-content,
+    [style*="backdrop-filter"] {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(15, 23, 42, 0.95) !important;
+    }
+    
+    /* ✅ Transition sürelerini minimize et */
     .card-hover,
     button,
     a {
         transition-duration: 0.1s !important;
+    }
+    
+    /* ✅ Transform animasyonlarını kapat */
+    * {
+        transform: none !important;
+    }
+    
+    /* ✅ Detayları Gör butonu için özel fix */
+    .details-button,
+    button[onclick*="openProjectModal"] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
     }
 }
 
