@@ -1,0 +1,38 @@
+# ═══════════════════════════════════════════════════════════════════
+# 🤖 ROBOTS.TXT - SEO Optimization
+# ═══════════════════════════════════════════════════════════════════
+
+# Tüm botlara izin ver
+User-agent: *
+Allow: /
+
+# Yasaklı dizinler
+Disallow: /admin
+Disallow: /404.html
+Disallow: /.well-known/
+
+# Crawl gecikme ayarı (opsiyonel)
+# Crawl-delay: 10
+
+# Sitemap
+Sitemap: https://www.bzkyapi.com/sitemap.xml
+
+# Özel botlar için kurallar
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+# Kötü botları engelle
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

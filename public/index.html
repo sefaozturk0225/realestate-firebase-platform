@@ -84,6 +84,12 @@
     <!-- Tailwind CSS Yüklemesi -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- 🎨 WHITE LABEL CONFIG - Müşteriye özel ayarlar bu dosyada -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <script src="site-config.js"></script>
+    
     <script type="module">
     // ...
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -98,10 +104,36 @@
 
 body {
     font-family: 'Inter', sans-serif;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #FACC15 #0F172A;
+}
+
+/* ✅ Site Geneli Scroll Performansı - project-modal gibi */
+body::-webkit-scrollbar {
+    width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #0F172A;
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #FACC15, #F59E0B);
+    border-radius: 10px;
+    border: 2px solid #0F172A;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #FDE047, #FACC15);
 }
 
 .elite-bg { background-color: #0F172A; }
@@ -436,7 +468,25 @@ img {
     overflow: hidden;
 }
 
-/* Admin Paneli Özel Stilleri */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* 🎨 CSS DEĞİŞKENLERİ - WHITE LABEL TEMA SİSTEMİ */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+    --color-brand: #FACC15;
+    --color-brand-dark: #F59E0B;
+    --color-brand-light: #FDE047;
+    --color-bg: #0F172A;
+    --color-bg-light: #1E293B;
+    --color-bg-card: #334155;
+    --color-text: #FFFFFF;
+    --color-text-muted: #94A3B8;
+    --color-text-dark: #0F172A;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* 🎛️ ADMIN PANEL - SIDEBAR LAYOUT */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 .admin-view {
     position: fixed;
     top: 0;
@@ -444,10 +494,200 @@ img {
     width: 100vw;
     height: 100vh;
     z-index: 300;
-    background-color: #1E293B;
-    transition: opacity 0.3s ease; /* 0.5s -> 0.3s */
-    overflow-y: auto;
+    background: var(--color-bg);
+    transition: opacity 0.3s ease;
+    overflow: hidden;
 }
+
+/* Sidebar */
+.admin-sidebar {
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(180deg, var(--color-bg-light) 0%, var(--color-bg) 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 50;
+    flex-shrink: 0;
+}
+
+/* Sidebar collapsed state (mobil) */
+@media (max-width: 1023px) {
+    .admin-sidebar {
+        position: fixed;
+        left: -280px;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+    }
+    
+    .admin-sidebar.open {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+
+/* Sidebar Menü Öğeleri */
+.admin-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+}
+
+.admin-menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+}
+
+.admin-menu-item.active {
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.15) 0%, transparent 100%);
+    color: var(--color-brand);
+}
+
+.admin-menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--color-brand);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Badge'ler */
+.admin-badge {
+    margin-left: auto;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    border-radius: 9999px;
+}
+
+.admin-badge-alert {
+    margin-left: auto;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #EF4444;
+    color: white;
+    border-radius: 9999px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Ana İçerik Alanı */
+.admin-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-bg);
+}
+
+/* Top Bar */
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(180deg, var(--color-bg-light) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Bölümler */
+.admin-section {
+    display: none;
+}
+
+.admin-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hızlı İşlem Butonları */
+.admin-quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    background: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.admin-quick-action:hover {
+    background: rgba(250, 204, 21, 0.1);
+    border-color: rgba(250, 204, 21, 0.3);
+    color: var(--color-brand);
+    transform: translateY(-2px);
+}
+
+/* Tema Butonları */
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.theme-btn:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+}
+
+.theme-btn.active {
+    border-color: var(--color-brand);
+    background: rgba(250, 204, 21, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* 🎨 ADMIN ORTAK STİLLER */
+/* ═══════════════════════════════════════════════════════════════════════════ */
 
 .hidden-view {
     display: none;
@@ -459,16 +699,157 @@ img {
     opacity: 1;
 }
 
+/* Admin Panel Kartları */
+.admin-card {
+    background: linear-gradient(145deg, var(--color-bg-light) 0%, var(--color-bg) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.admin-card:hover {
+    border-color: rgba(250, 204, 21, 0.2);
+}
+
+/* Admin Tablo Stilleri */
+.admin-table {
+    width: 100%;
+}
+
+.admin-table thead {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-table th {
+    color: var(--color-brand);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    font-size: 0.7rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.admin-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ✅ Admin Form Inputs */
+.admin-input {
+    background: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: white;
+    padding: 0.875rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.admin-input:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.1);
+    outline: none;
+}
+
+.admin-input::placeholder {
+    color: #64748B;
+}
+
+/* ✅ Admin Butonları */
+.admin-btn-primary {
+    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
+    color: var(--color-text-dark);
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.2);
+    font-size: 0.875rem;
+}
+
+.admin-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.3);
+}
+
+.admin-btn-secondary {
+    background: var(--color-bg-light);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.admin-btn-secondary:hover {
+    border-color: rgba(250, 204, 21, 0.3);
+    background: var(--color-bg-card);
+}
+
+.admin-btn-danger {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.admin-btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* ✅ Admin Stats Cards */
+.admin-stat-card {
+    background: var(--color-bg-light);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.admin-stat-card:hover {
+    border-color: rgba(250, 204, 21, 0.2);
+}
+
+.admin-stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
 /* Drag & Drop Alanı Stilleri */
 #image-drop-zone {
     border: 2px dashed #475569;
-    background-color: #1E293B;
-    transition: border-color 0.2s, background-color 0.2s;
+    background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+    transition: all 0.3s ease;
+    border-radius: 1rem;
+}
+
+#image-drop-zone:hover {
+    border-color: rgba(250, 204, 21, 0.5);
+    background: linear-gradient(180deg, #1E293B 0%, #334155 100%);
 }
 
 #image-drop-zone.dragover {
     border-color: #FACC15;
-    background-color: #334155;
+    background: linear-gradient(180deg, #334155 0%, #475569 100%);
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
 }
 
 .preview-image-container {
@@ -476,6 +857,15 @@ img {
     width: 80px;
     height: 80px;
     background-color: #475569;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.preview-image-container:hover {
+    border-color: rgba(250, 204, 21, 0.5);
+    transform: scale(1.05);
 }
 
 .preview-image-container img {
@@ -1684,7 +2074,7 @@ window.deleteInquiry = async (inquiryId) => {
                 <div class="desktop-nav">
                     <a href="#projelerimiz" class="nav-link">
                         <i data-lucide="home" class="nav-icon"></i>
-                        <span>Projeler</span>
+                        <span>Projelerimiz</span>
                     </a>
                     <a href="#hakkimizda" class="nav-link">
                         <i data-lucide="info" class="nav-icon"></i>
@@ -1908,122 +2298,412 @@ window.deleteInquiry = async (inquiryId) => {
         </footer>
     </div>
     
-    <!-- 2. ADMIN PANELİ GÖRÜNÜMÜ (GÜNCELLENDİ) -->
+    <!-- 2. ADMIN PANELİ GÖRÜNÜMÜ - SIDEBAR LAYOUT -->
     <div id="admin-view" class="admin-view hidden-view">
-        <header class="bg-slate-900 shadow-lg py-4 px-6 flex justify-between items-center sticky top-0 z-10">
-            <h1 class="text-3xl font-extrabold elite-text">Yönetici Paneli</h1>
-            <button onclick="window.adminLogout()" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 flex items-center">
-                <i data-lucide="log-out" class="w-5 h-5 mr-2"></i> Çıkış Yap
-            </button>
-        </header>
-
-        <main class="p-4 md:p-8 max-w-7xl mx-auto">
-            <!-- Proje Yönetimi -->
-            <h2 class="text-2xl font-bold text-white mb-6">Proje Yönetimi</h2>
-            <div class="flex justify-end mb-6">
-                <button onclick="window.openProjectModal()" class="px-6 py-3 bg-elite-text bg-yellow-400 text-slate-900 font-bold rounded-lg shadow-lg transition duration-300 flex items-center">
-                    <i data-lucide="plus" class="w-5 h-5 mr-2"></i> Yeni Proje Ekle
-                </button>
-            </div>
-
-            <!-- Projeler Tablosu -->
-            <div class="bg-slate-900 rounded-xl shadow-2xl overflow-x-auto">
-                    <table class="min-w-full divide-y-2 divide-slate-700">
-    <thead class="bg-slate-800">
-        <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Başlık</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Durum</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Yıl</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Sıra</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Eylemler</th>
-        </tr>
-    </thead>
-                    <tbody id="admin-project-table-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="text-center py-4 text-gray-500">Projeler yükleniyor...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <p id="admin-no-projects-message" class="text-center text-gray-500 mt-8 hidden">Henüz bir proje eklenmemiş.</p>
+        <div class="flex h-screen">
             
-            <!-- YENİ: Gelen Teklif İstekleri Bölümü -->
-            <h2 class="text-2xl font-bold text-white mb-6 mt-12 border-t pt-6 border-slate-700">Gelen Teklif İstekleri</h2>
-            <div class="bg-slate-900 rounded-xl shadow-2xl overflow-x-auto">
-                <!-- Gelen Teklif İstekleri Tablosu -->
-<table class="min-w-full divide-y-2 divide-slate-700">
-    <thead class="bg-slate-800">
-        <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[15%]">Ad Soyad</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[20%]">E-posta</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[30%]">Mesaj Özeti</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[15%]">Tarih</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-[10%]">Durum</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider w-[10%]">Eylemler</th>
-        </tr>
-    </thead>
-    <tbody id="admin-inquiry-table-body" class="divide-y divide-slate-800">
-        <tr><td colspan="6" class="text-center py-4 text-gray-500">İstekler yükleniyor...</td></tr>
-    </tbody>
-</table>
-            </div>
-            <p id="admin-no-inquiries-message" class="text-center text-gray-500 mt-8 hidden">Henüz bir teklif isteği gelmemiştir.</p>
-            <!-- İLETİŞİM BİLGİLERİ YÖNETİMİ -->
-<h2 class="text-2xl font-bold text-white mb-6 mt-12 border-t pt-6 border-slate-700">İşletme İletişim Bilgileri</h2>
-<div class="bg-slate-900 rounded-xl shadow-2xl p-8 max-w-3xl">
-    <form onsubmit="event.preventDefault(); window.saveContactInfo()">
-        <div class="mb-4">
-            <label for="admin-contact-address" class="block text-sm font-medium text-gray-400 mb-2">Adres</label>
-            <input type="text" id="admin-contact-address" required 
-                   class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
-                   placeholder="Örnek Mah. Elit Cad. No: 42/A Konak, İzmir / Türkiye">
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div>
-                <label for="admin-contact-phone" class="block text-sm font-medium text-gray-400 mb-2">Telefon</label>
-                <input type="tel" id="admin-contact-phone" required 
-                       class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
-                       placeholder="+90 232 XXX XX XX">
-            </div>
-            <div>
-                <label for="admin-contact-email" class="block text-sm font-medium text-gray-400 mb-2">E-posta</label>
-                <input type="email" id="admin-contact-email" required 
-                       class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
-                       placeholder="info@bozkurtinsaat.com.tr">
-            </div>
-        </div>
-        <button type="submit" class="w-full px-6 py-3 bg-yellow-400 text-slate-900 font-bold rounded-full shadow-lg transition duration-300 transform hover:scale-[1.01]">
-            İletişim Bilgilerini Kaydet
-        </button>
-    </form>
-</div>
-
-<!-- ✨ YENİ: HAKKIMIZDA YÖNETİMİ -->
-<h2 class="text-2xl font-bold text-white mb-6 mt-12 border-t pt-6 border-slate-700 flex items-center gap-2">
-    <i data-lucide="info" class="w-7 h-7 elite-text"></i>
-    Hakkımızda İçerik Yönetimi
-</h2>
-<div class="bg-slate-900 rounded-xl shadow-2xl p-8">
-    <form id="about-form" onsubmit="event.preventDefault(); window.saveAboutUs()">
-        <div class="mb-6">
-            <label for="about-title" class="block text-sm font-medium text-gray-400 mb-2">Başlık</label>
-            <input type="text" id="about-title" required
-                   class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all"
-                   placeholder="Örn: Bozkurt İnşaat Hakkında">
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- 📱 SIDEBAR -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <aside id="admin-sidebar" class="admin-sidebar">
+                <!-- Logo & Firma Adı -->
+                <div class="p-6 border-b border-slate-700/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-brand to-brand-dark rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                            <i data-lucide="building-2" class="w-5 h-5 text-slate-900"></i>
+                        </div>
+                        <div class="sidebar-text">
+                            <h1 class="text-lg font-bold text-white" id="admin-company-name">BZK Yapı</h1>
+                            <p class="text-xs text-gray-400">Yönetici Paneli</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Menü -->
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                    <button onclick="window.showAdminSection('dashboard')" class="admin-menu-item active" data-section="dashboard">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Gösterge Paneli</span>
+                    </button>
+                    <button onclick="window.showAdminSection('projects')" class="admin-menu-item" data-section="projects">
+                        <i data-lucide="building-2" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Projeler</span>
+                        <span class="admin-badge sidebar-text" id="badge-projects">0</span>
+                    </button>
+                    <button onclick="window.showAdminSection('inquiries')" class="admin-menu-item" data-section="inquiries">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Teklif İstekleri</span>
+                        <span class="admin-badge-alert sidebar-text" id="badge-inquiries">0</span>
+                    </button>
+                    
+                    <div class="pt-4 mt-4 border-t border-slate-700/50">
+                        <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sidebar-text">Ayarlar</p>
+                    </div>
+                    
+                    <button onclick="window.showAdminSection('contact')" class="admin-menu-item" data-section="contact">
+                        <i data-lucide="phone" class="w-5 h-5"></i>
+                        <span class="sidebar-text">İletişim Bilgileri</span>
+                    </button>
+                    <button onclick="window.showAdminSection('about')" class="admin-menu-item" data-section="about">
+                        <i data-lucide="info" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Hakkımızda</span>
+                    </button>
+                    <button onclick="window.showAdminSection('settings')" class="admin-menu-item" data-section="settings">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Site Ayarları</span>
+                    </button>
+                </nav>
+                
+                <!-- Alt Kısım - Kullanıcı & Çıkış -->
+                <div class="p-4 border-t border-slate-700/50">
+                    <button onclick="window.adminLogout()" class="admin-menu-item text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Çıkış Yap</span>
+                    </button>
+                    <button onclick="window.open('https://www.bzkyapi.com', '_blank')" class="admin-menu-item mt-2 text-gray-400 hover:bg-slate-700/50">
+                        <i data-lucide="external-link" class="w-5 h-5"></i>
+                        <span class="sidebar-text">Siteyi Görüntüle</span>
+                    </button>
+                </div>
+            </aside>
+            
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- 📄 ANA İÇERİK ALANI -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <main class="admin-main-content">
+                <!-- Top Bar -->
+                <header class="admin-topbar">
+                    <div class="flex items-center gap-4">
+                        <button onclick="window.toggleAdminSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-700/50 text-gray-400">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-xl font-bold text-white" id="admin-page-title">Gösterge Paneli</h2>
+                            <p class="text-sm text-gray-400" id="admin-page-subtitle">Genel bakış ve istatistikler</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-400 hidden sm:block" id="admin-current-date"></span>
+                        <div class="w-8 h-8 bg-gradient-to-br from-brand to-brand-dark rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-900"></i>
+                        </div>
+                    </div>
+                </header>
+                
+                <!-- İçerik Bölümleri -->
+                <div class="p-6 overflow-y-auto" style="height: calc(100vh - 73px);">
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- 📊 DASHBOARD BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-dashboard" class="admin-section active">
+                        <!-- Stats Kartları -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div class="admin-stat-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-400">Toplam Proje</p>
+                                        <p class="admin-stat-number" id="stat-total-projects">0</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-brand/10 rounded-xl flex items-center justify-center">
+                                        <i data-lucide="building-2" class="w-6 h-6 text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-400">Devam Eden</p>
+                                        <p class="admin-stat-number text-yellow-500" id="stat-ongoing-projects">0</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                                        <i data-lucide="clock" class="w-6 h-6 text-yellow-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-400">Tamamlanan</p>
+                                        <p class="admin-stat-number text-green-500" id="stat-completed-projects">0</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                                        <i data-lucide="check-circle" class="w-6 h-6 text-green-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-400">Bekleyen Talep</p>
+                                        <p class="admin-stat-number text-red-500" id="stat-pending-inquiries">0</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+                                        <i data-lucide="mail" class="w-6 h-6 text-red-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hızlı Erişim -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="admin-card p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="zap" class="w-5 h-5 text-brand"></i>
+                                    Hızlı İşlemler
+                                </h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="window.openProjectModal()" class="admin-quick-action">
+                                        <i data-lucide="plus" class="w-5 h-5"></i>
+                                        <span>Yeni Proje</span>
+                                    </button>
+                                    <button onclick="window.showAdminSection('inquiries')" class="admin-quick-action">
+                                        <i data-lucide="mail" class="w-5 h-5"></i>
+                                        <span>Talepleri Gör</span>
+                                    </button>
+                                    <button onclick="window.showAdminSection('contact')" class="admin-quick-action">
+                                        <i data-lucide="phone" class="w-5 h-5"></i>
+                                        <span>İletişim Düzenle</span>
+                                    </button>
+                                    <button onclick="window.showView('main')" class="admin-quick-action">
+                                        <i data-lucide="external-link" class="w-5 h-5"></i>
+                                        <span>Siteyi Önizle</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="admin-card p-6">
+                                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="activity" class="w-5 h-5 text-brand"></i>
+                                    Son Aktiviteler
+                                </h3>
+                                <div id="recent-activities" class="space-y-3">
+                                    <p class="text-gray-500 text-sm">Henüz aktivite yok.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- 🏗️ PROJELER BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-projects" class="admin-section">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Tüm Projeler</h3>
+                                <p class="text-sm text-gray-400">Projeleri yönetin, düzenleyin veya silin</p>
+                            </div>
+                            <button onclick="window.openProjectModal()" class="admin-btn-primary flex items-center gap-2">
+                                <i data-lucide="plus" class="w-5 h-5"></i> Yeni Proje Ekle
+                            </button>
+                        </div>
+                        
+                        <div class="admin-card overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="admin-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left">Başlık</th>
+                                            <th class="text-left">Durum</th>
+                                            <th class="text-left">Yıl</th>
+                                            <th class="text-center">Sıra</th>
+                                            <th class="text-right">Eylemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-project-table-body">
+                                        <tr><td colspan="5" class="text-center py-8 text-gray-500">Projeler yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <p id="admin-no-projects-message" class="text-center text-gray-500 mt-8 hidden">Henüz bir proje eklenmemiş.</p>
+                    </section>
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- 📧 TEKLİF İSTEKLERİ BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-inquiries" class="admin-section">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-white">Gelen Teklif İstekleri</h3>
+                            <p class="text-sm text-gray-400">Müşteri taleplerini görüntüleyin ve yönetin</p>
+                        </div>
+                        
+                        <div class="admin-card overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="admin-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left">Ad Soyad</th>
+                                            <th class="text-left">E-posta</th>
+                                            <th class="text-left">Mesaj</th>
+                                            <th class="text-left">Tarih</th>
+                                            <th class="text-center">Durum</th>
+                                            <th class="text-right">Eylemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-inquiry-table-body">
+                                        <tr><td colspan="6" class="text-center py-8 text-gray-500">İstekler yükleniyor...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <p id="admin-no-inquiries-message" class="text-center text-gray-500 mt-8 hidden">Henüz bir teklif isteği gelmemiştir.</p>
+                    </section>
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- 📞 İLETİŞİM BİLGİLERİ BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-contact" class="admin-section">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-white">İletişim Bilgileri</h3>
+                            <p class="text-sm text-gray-400">Sitede görünen iletişim bilgilerini güncelleyin</p>
+                        </div>
+                        
+                        <div class="admin-card p-6 max-w-2xl">
+                            <form onsubmit="event.preventDefault(); window.saveContactInfo()">
+                                <div class="mb-4">
+                                    <label for="admin-contact-address" class="block text-sm font-medium text-gray-400 mb-2">Adres</label>
+                                    <input type="text" id="admin-contact-address" required 
+                                           class="admin-input w-full"
+                                           placeholder="Örnek Mah. Elit Cad. No: 42/A Konak, İzmir / Türkiye">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <label for="admin-contact-phone" class="block text-sm font-medium text-gray-400 mb-2">Telefon</label>
+                                        <input type="tel" id="admin-contact-phone" required 
+                                               class="admin-input w-full"
+                                               placeholder="+90 232 XXX XX XX">
+                                    </div>
+                                    <div>
+                                        <label for="admin-contact-email" class="block text-sm font-medium text-gray-400 mb-2">E-posta</label>
+                                        <input type="email" id="admin-contact-email" required 
+                                               class="admin-input w-full"
+                                               placeholder="info@firma.com">
+                                    </div>
+                                </div>
+                                <button type="submit" class="admin-btn-primary flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Kaydet
+                                </button>
+                            </form>
+                        </div>
+                    </section>
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- ℹ️ HAKKIMIZDA BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-about" class="admin-section">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-white">Hakkımızda İçeriği</h3>
+                            <p class="text-sm text-gray-400">Ana sayfadaki "Hakkımızda" bölümünü düzenleyin</p>
+                        </div>
+                        
+                        <div class="admin-card p-6 max-w-2xl">
+                            <form id="about-form" onsubmit="event.preventDefault(); window.saveAboutUs()">
+                                <div class="mb-4">
+                                    <label for="about-title" class="block text-sm font-medium text-gray-400 mb-2">Başlık</label>
+                                    <input type="text" id="about-title" required
+                                           class="admin-input w-full"
+                                           placeholder="Örn: Neden Bizi Tercih Etmelisiniz?">
+                                </div>
+                                <div class="mb-6">
+                                    <label for="about-content" class="block text-sm font-medium text-gray-400 mb-2">İçerik</label>
+                                    <textarea id="about-content" rows="8" required
+                                              class="admin-input w-full resize-none"
+                                              placeholder="Firma tanıtımı, misyon, vizyon..."></textarea>
+                                </div>
+                                <button type="submit" class="admin-btn-primary flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Kaydet
+                                </button>
+                            </form>
+                        </div>
+                    </section>
+                    
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- ⚙️ SİTE AYARLARI BÖLÜMÜ -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <section id="section-settings" class="admin-section">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-white">Site Ayarları</h3>
+                            <p class="text-sm text-gray-400">Genel site ayarlarını yapılandırın</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Tema Ayarları -->
+                            <div class="admin-card p-6">
+                                <h4 class="text-md font-semibold text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="palette" class="w-5 h-5 text-brand"></i>
+                                    Tema Renkleri
+                                </h4>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <button onclick="window.changeTheme('gold')" class="theme-btn" data-theme="gold">
+                                        <span class="w-6 h-6 rounded-full bg-yellow-500"></span>
+                                        <span>Altın</span>
+                                    </button>
+                                    <button onclick="window.changeTheme('blue')" class="theme-btn" data-theme="blue">
+                                        <span class="w-6 h-6 rounded-full bg-blue-500"></span>
+                                        <span>Mavi</span>
+                                    </button>
+                                    <button onclick="window.changeTheme('green')" class="theme-btn" data-theme="green">
+                                        <span class="w-6 h-6 rounded-full bg-green-500"></span>
+                                        <span>Yeşil</span>
+                                    </button>
+                                    <button onclick="window.changeTheme('red')" class="theme-btn" data-theme="red">
+                                        <span class="w-6 h-6 rounded-full bg-red-500"></span>
+                                        <span>Kırmızı</span>
+                                    </button>
+                                    <button onclick="window.changeTheme('purple')" class="theme-btn" data-theme="purple">
+                                        <span class="w-6 h-6 rounded-full bg-purple-500"></span>
+                                        <span>Mor</span>
+                                    </button>
+                                    <button onclick="window.changeTheme('orange')" class="theme-btn" data-theme="orange">
+                                        <span class="w-6 h-6 rounded-full bg-orange-500"></span>
+                                        <span>Turuncu</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Firma Bilgileri -->
+                            <div class="admin-card p-6">
+                                <h4 class="text-md font-semibold text-white mb-4 flex items-center gap-2">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-brand"></i>
+                                    Firma Bilgileri
+                                </h4>
+                                <form onsubmit="event.preventDefault(); window.saveCompanyInfo()">
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-400 mb-2">Firma Adı</label>
+                                        <input type="text" id="setting-company-name" class="admin-input w-full" placeholder="Firma Adı">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-400 mb-2">Slogan</label>
+                                        <input type="text" id="setting-company-slogan" class="admin-input w-full" placeholder="Firma Sloganı">
+                                    </div>
+                                    <button type="submit" class="admin-btn-primary flex items-center gap-2">
+                                        <i data-lucide="save" class="w-4 h-4"></i> Kaydet
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Config Önizleme (Geliştirici için) -->
+                        <div class="admin-card p-6 mt-6">
+                            <h4 class="text-md font-semibold text-white mb-4 flex items-center gap-2">
+                                <i data-lucide="code" class="w-5 h-5 text-brand"></i>
+                                Yapılandırma Önizleme
+                            </h4>
+                            <p class="text-sm text-gray-400 mb-3">Yeni müşteri için config dosyasını buradan kopyalayabilirsiniz.</p>
+                            <pre id="config-preview" class="bg-slate-900 p-4 rounded-lg text-xs text-gray-300 overflow-x-auto max-h-64"></pre>
+                            <button onclick="window.copyConfig()" class="admin-btn-secondary mt-3 flex items-center gap-2">
+                                <i data-lucide="copy" class="w-4 h-4"></i> Config'i Kopyala
+                            </button>
+                        </div>
+                    </section>
+                    
+                </div>
+            </main>
         </div>
         
-        <div class="mb-6">
-            <label for="about-content" class="block text-sm font-medium text-gray-400 mb-2">İçerik</label>
-            <textarea id="about-content" rows="10" required
-                      class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all resize-none"
-                      placeholder="Hakkımızda içeriğini buraya yazın... (Firma tanıtımı, misyon, vizyon, değerler vb.)"></textarea>
-        </div>
-        
-        <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-900 font-bold rounded-full shadow-lg transition duration-300 transform hover:scale-[1.01] flex items-center justify-center gap-2">
-            <i data-lucide="save" class="w-5 h-5"></i>
-            Hakkımızda Bilgilerini Kaydet
-        </button>
-    </form>
-</div>
-        </main>
+        <!-- Mobil Sidebar Overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="window.toggleAdminSidebar()"></div>
     </div>
 
     <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-80 z-[400] hidden justify-center items-center p-4 transition duration-300 opacity-0" aria-modal="true" role="dialog">
@@ -2417,7 +3097,10 @@ window.deleteInquiry = async (inquiryId) => {
                 adminView.classList.add('visible-view');
                 document.body.classList.add('elite-bg'); 
                 window.renderAdminProjectTable();
-                window.renderAdminInquiryTable(); // YENİ: İstekler tablosunu da render et
+                window.renderAdminInquiryTable();
+                window.updateAdminStats();
+                window.updateAdminDate();
+                window.showAdminSection('dashboard'); // Dashboard'u varsayılan olarak göster
             } else { // main
                 adminView.classList.remove('visible-view');
                 adminView.classList.add('hidden-view');
@@ -2426,6 +3109,131 @@ window.deleteInquiry = async (inquiryId) => {
                 window.renderProjects();
             }
             lucide.createIcons();
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════
+        // 🎛️ ADMIN SIDEBAR FONKSİYONLARI
+        // ═══════════════════════════════════════════════════════════════════
+        
+        // Admin bölüm değiştirme
+        window.showAdminSection = function(sectionId) {
+            // Tüm bölümleri gizle
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Tüm menü öğelerinden active'i kaldır
+            document.querySelectorAll('.admin-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Seçilen bölümü göster
+            const section = document.getElementById('section-' + sectionId);
+            if (section) {
+                section.classList.add('active');
+            }
+            
+            // Seçilen menü öğesini aktif yap
+            const menuItem = document.querySelector(`[data-section="${sectionId}"]`);
+            if (menuItem) {
+                menuItem.classList.add('active');
+            }
+            
+            // Sayfa başlığını güncelle
+            const titles = {
+                dashboard: { title: 'Gösterge Paneli', subtitle: 'Genel bakış ve istatistikler' },
+                projects: { title: 'Projeler', subtitle: 'Tüm projeleri yönetin' },
+                inquiries: { title: 'Teklif İstekleri', subtitle: 'Müşteri taleplerini görüntüleyin' },
+                contact: { title: 'İletişim Bilgileri', subtitle: 'Site iletişim bilgilerini düzenleyin' },
+                about: { title: 'Hakkımızda', subtitle: 'Firma tanıtım içeriğini düzenleyin' },
+                settings: { title: 'Site Ayarları', subtitle: 'Genel yapılandırma seçenekleri' }
+            };
+            
+            const pageTitle = document.getElementById('admin-page-title');
+            const pageSubtitle = document.getElementById('admin-page-subtitle');
+            
+            if (titles[sectionId]) {
+                if (pageTitle) pageTitle.textContent = titles[sectionId].title;
+                if (pageSubtitle) pageSubtitle.textContent = titles[sectionId].subtitle;
+            }
+            
+            // Mobilde sidebar'ı kapat
+            if (window.innerWidth < 1024) {
+                window.toggleAdminSidebar(false);
+            }
+            
+            lucide.createIcons();
+        }
+        
+        // Sidebar toggle (mobil)
+        window.toggleAdminSidebar = function(forceState) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (typeof forceState === 'boolean') {
+                sidebar.classList.toggle('open', forceState);
+                overlay.classList.toggle('active', forceState);
+            } else {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            }
+        }
+        
+        // Admin tarih güncelleme
+        window.updateAdminDate = function() {
+            const dateEl = document.getElementById('admin-current-date');
+            if (dateEl) {
+                const now = new Date();
+                dateEl.textContent = now.toLocaleDateString('tr-TR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            }
+        }
+        
+        // Badge güncelleme
+        window.updateAdminBadges = function() {
+            const projectBadge = document.getElementById('badge-projects');
+            const inquiryBadge = document.getElementById('badge-inquiries');
+            
+            if (projectBadge) {
+                projectBadge.textContent = window.projects?.length || 0;
+            }
+            
+            if (inquiryBadge) {
+                const pendingCount = window.inquiries?.filter(i => i.status === 'Yeni' || i.status === 'pending' || !i.status).length || 0;
+                inquiryBadge.textContent = pendingCount;
+                inquiryBadge.style.display = pendingCount > 0 ? 'inline' : 'none';
+            }
+        }
+        
+        // Config kopyalama
+        window.copyConfig = function() {
+            const config = {
+                company: {
+                    name: document.getElementById('setting-company-name')?.value || 'Firma Adı',
+                    slogan: document.getElementById('setting-company-slogan')?.value || 'Firma Sloganı'
+                },
+                contact: window.contactInfo || {},
+                theme: 'gold'
+            };
+            
+            navigator.clipboard.writeText(JSON.stringify(config, null, 2))
+                .then(() => window.showMessage('Config kopyalandı!', 'bg-green-600'))
+                .catch(() => window.showMessage('Kopyalama başarısız!', 'bg-red-600'));
+        }
+        
+        // Tema değiştirme (gelecek için)
+        window.changeTheme = function(themeName) {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.theme === themeName) {
+                    btn.classList.add('active');
+                }
+            });
+            window.showMessage(`${themeName.charAt(0).toUpperCase() + themeName.slice(1)} teması seçildi!`, 'bg-green-600');
         }
 
         // Mobile Menu Aç/Kapa
@@ -2511,7 +3319,7 @@ window.renderProjectCard = function(project) {
                 <!-- Gösterge Noktaları -->
                 <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-20">
                     ${project.images.map((_, idx) => `
-                        <span class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-yellow-500' : 'bg-white/50'} transition-all" data-card="${cardId}" data-index="${idx}"></span>
+                        <span onclick="window.cardCarouselGoTo('${cardId}', ${idx}, ${project.images.length}); event.stopPropagation();" class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-yellow-500' : 'bg-white/50'} transition-all cursor-pointer hover:scale-125" data-card="${cardId}" data-index="${idx}"></span>
                     `).join('')}
                 </div>
                 ` : ''}
@@ -2550,6 +3358,11 @@ window.renderProjectCard = function(project) {
 // Kart carousel fonksiyonları
 window.cardCarouselIndexes = {};
 
+window.cardCarouselGoTo = function(cardId, index, totalImages) {
+    window.cardCarouselIndexes[cardId] = index;
+    window.updateCardCarousel(cardId, totalImages);
+}
+
 window.cardCarouselNext = function(cardId, totalImages) {
     if (!window.cardCarouselIndexes[cardId]) window.cardCarouselIndexes[cardId] = 0;
     window.cardCarouselIndexes[cardId] = (window.cardCarouselIndexes[cardId] + 1) % totalImages;
@@ -2578,6 +3391,40 @@ window.updateCardCarousel = function(cardId, totalImages) {
                 dot.classList.add('bg-white/50');
             }
         });
+    }
+}
+
+// Touch Gesture Support for Card Carousels
+window.initCardCarouselTouch = function(cardId, totalImages) {
+    const carousel = document.getElementById(`${cardId}-carousel`);
+    if (!carousel || !carousel.parentElement) return;
+    
+    const container = carousel.parentElement;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    container.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    container.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swipe left - next
+                window.cardCarouselNext(cardId, totalImages);
+            } else {
+                // Swipe right - prev
+                window.cardCarouselPrev(cardId, totalImages);
+            }
+        }
     }
 }
 
@@ -2640,7 +3487,7 @@ window.renderOngoingProjectCard = function(project) {
                 <!-- Gösterge Noktaları -->
                 <div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-20">
                     ${project.images.map((_, idx) => `
-                        <span class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-yellow-500' : 'bg-white/50'} transition-all" data-card="${cardId}" data-index="${idx}"></span>
+                        <span onclick="window.cardCarouselGoTo('${cardId}', ${idx}, ${project.images.length}); event.stopPropagation();" class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-yellow-500' : 'bg-white/50'} transition-all cursor-pointer hover:scale-125" data-card="${cardId}" data-index="${idx}"></span>
                     `).join('')}
                 </div>
                 ` : ''}
@@ -2720,6 +3567,15 @@ window.renderOngoingProjectCard = function(project) {
         });
         completedContainer.appendChild(fragment);
         noCompleted.classList.add('hidden');
+        
+        // Touch gesture'ları initialize et
+        setTimeout(() => {
+            completed.forEach(p => {
+                if (p.images && p.images.length > 1) {
+                    window.initCardCarouselTouch(`card-${p.id}`, p.images.length);
+                }
+            });
+        }, 100);
     } else {
         completedContainer.innerHTML = '';
         noCompleted.classList.remove('hidden');
@@ -2735,6 +3591,15 @@ window.renderOngoingProjectCard = function(project) {
         });
         ongoingContainer.appendChild(fragment);
         noOngoing.classList.add('hidden');
+        
+        // Touch gesture'ları initialize et
+        setTimeout(() => {
+            ongoing.forEach(p => {
+                if (p.images && p.images.length > 1) {
+                    window.initCardCarouselTouch(`card-${p.id}`, p.images.length);
+                }
+            });
+        }, 100);
     } else {
         ongoingContainer.innerHTML = '';
         noOngoing.classList.remove('hidden');
@@ -3650,11 +4515,14 @@ window.goToSlide = function(index) {
             const noProjectsMessage = document.getElementById('admin-no-projects-message');
             if (!tableBody) return;
 
+            // ✅ Admin Stats Kartlarını Güncelle
+            window.updateAdminStats();
+
             tableBody.innerHTML = ''; 
 
             if (window.projects.length === 0) {
                 noProjectsMessage.classList.remove('hidden');
-                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Henüz bir proje eklenmemiş.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">Henüz bir proje eklenmemiş.</td></tr>';
                 return;
             }
             noProjectsMessage.classList.add('hidden');
@@ -3664,47 +4532,70 @@ window.goToSlide = function(index) {
 
             sortedProjects.forEach((project, index) => {
                 const isCompleted = project.status === 'completed';
-                const statusColor = isCompleted ? 'bg-green-600' : 'bg-yellow-600';
+                const statusColor = isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-yellow-500 to-amber-600';
                 const statusText = isCompleted ? 'Tamamlandı' : 'Devam Ediyor';
                 const isFirst = index === 0;
                 const isLast = index === sortedProjects.length - 1;
 
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-800 transition duration-150';
+                row.className = 'hover:bg-slate-800/50 transition duration-150';
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${project.title}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} text-slate-900">${statusText}</span>
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} text-slate-900 shadow-sm">${statusText}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${project.year || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="flex items-center justify-center gap-2">
                             <button onclick="window.moveProject('${project.id}', 'up')" 
                                     ${isFirst ? 'disabled' : ''}
-                                    class="text-yellow-500 hover:text-yellow-300 transition ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}" 
+                                    class="p-1.5 rounded-lg bg-slate-700/50 text-yellow-500 hover:text-yellow-300 hover:bg-slate-600/50 transition ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}" 
                                     aria-label="Yukarı Taşı">
-                                <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                                <i data-lucide="arrow-up" class="w-4 h-4"></i>
                             </button>
                             <button onclick="window.moveProject('${project.id}', 'down')" 
                                     ${isLast ? 'disabled' : ''}
-                                    class="text-yellow-500 hover:text-yellow-300 transition ${isLast ? 'opacity-30 cursor-not-allowed' : ''}" 
+                                    class="p-1.5 rounded-lg bg-slate-700/50 text-yellow-500 hover:text-yellow-300 hover:bg-slate-600/50 transition ${isLast ? 'opacity-30 cursor-not-allowed' : ''}" 
                                     aria-label="Aşağı Taşı">
-                                <i data-lucide="arrow-down" class="w-5 h-5"></i>
+                                <i data-lucide="arrow-down" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <button onclick="window.editProject('${project.id}')" class="text-blue-500 hover:text-blue-300 transition" aria-label="Düzenle">
-                            <i data-lucide="square-pen" class="w-5 h-5 inline-block"></i>
-                        </button>
-                        <button onclick="window.deleteProject('${project.id}')" class="text-red-500 hover:text-red-300 transition" aria-label="Sil">
-                            <i data-lucide="trash-2" class="w-5 h-5 inline-block"></i>
-                        </button>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="window.editProject('${project.id}')" class="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition" aria-label="Düzenle">
+                                <i data-lucide="square-pen" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="window.deleteProject('${project.id}')" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition" aria-label="Sil">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
             lucide.createIcons();
+        }
+        
+        // ✅ YENİ: Admin Stats Güncelleme Fonksiyonu
+        window.updateAdminStats = function() {
+            const totalProjects = window.projects?.length || 0;
+            const ongoingProjects = window.projects?.filter(p => p.status !== 'completed').length || 0;
+            const completedProjects = window.projects?.filter(p => p.status === 'completed').length || 0;
+            const pendingInquiries = window.inquiries?.filter(i => i.status === 'Yeni' || i.status === 'pending' || !i.status).length || 0;
+            
+            const statTotal = document.getElementById('stat-total-projects');
+            const statOngoing = document.getElementById('stat-ongoing-projects');
+            const statCompleted = document.getElementById('stat-completed-projects');
+            const statPending = document.getElementById('stat-pending-inquiries');
+            
+            if (statTotal) statTotal.textContent = totalProjects;
+            if (statOngoing) statOngoing.textContent = ongoingProjects;
+            if (statCompleted) statCompleted.textContent = completedProjects;
+            if (statPending) statPending.textContent = pendingInquiries;
+            
+            // Badge'leri de güncelle
+            window.updateAdminBadges();
         }
         
         // ✨ YENİ: Proje Sıralama Fonksiyonu
@@ -3779,10 +4670,13 @@ window.goToSlide = function(index) {
     if (!tableBody) return;
 
     tableBody.innerHTML = '';
+    
+    // Stats güncelle
+    window.updateAdminStats();
 
     if (window.inquiries.length === 0) {
         noInquiriesMessage.classList.remove('hidden');
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Henüz bir teklif isteği gelmemiştir.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Henüz bir teklif isteği gelmemiştir.</td></tr>';
         return;
     }
     noInquiriesMessage.classList.add('hidden');
@@ -3790,24 +4684,28 @@ window.goToSlide = function(index) {
     window.inquiries.forEach(inquiry => {
         const date = new Date(inquiry.timestamp).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const summary = inquiry.message.length > 50 ? inquiry.message.substring(0, 50) + '...' : inquiry.message;
-        const statusColor = inquiry.status === 'Yeni' ? 'bg-red-600' : 'bg-green-600';
+        const isNew = inquiry.status === 'Yeni' || inquiry.status === 'pending' || !inquiry.status;
+        const statusColor = isNew ? 'bg-gradient-to-r from-red-500 to-rose-600' : 'bg-gradient-to-r from-green-500 to-emerald-600';
+        const statusText = isNew ? 'Yeni' : 'Okundu';
 
         const row = document.createElement('tr');
-        row.className = 'hover:bg-slate-800 transition duration-150';
+        row.className = 'hover:bg-slate-800/50 transition duration-150';
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white w-[15%]">${inquiry.name}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 w-[20%]">${inquiry.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 w-[20%]">
+                <a href="mailto:${inquiry.email}" class="hover:text-yellow-400 transition">${inquiry.email}</a>
+            </td>
             <td class="px-6 py-4 text-sm text-gray-300 truncate cursor-pointer hover:text-yellow-400 w-[30%]" onclick="window.showMessage('Tam Mesaj: ${inquiry.message.replace(/'/g, "\\'")}', 'bg-blue-600', 10000)" title="Mesajın tamamını görmek için tıklayın">${summary}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 w-[15%]">${date}</td>
             <td class="px-6 py-4 whitespace-nowrap text-center w-[10%]">
-            <button onclick="window.updateInquiryStatus('${inquiry.id}', '${inquiry.status === 'Yeni' ? 'Okundu' : 'Yeni'}')" 
-            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} text-white hover:opacity-80 transition cursor-pointer">
-            ${inquiry.status}
-            </button>
+                <button onclick="window.updateInquiryStatus('${inquiry.id}', '${isNew ? 'Okundu' : 'Yeni'}')" 
+                        class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} text-white hover:opacity-80 transition cursor-pointer shadow-sm">
+                    ${statusText}
+                </button>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium w-[10%]">
-                <button onclick="window.deleteInquiry('${inquiry.id}')" class="text-red-500 hover:text-red-300 transition" aria-label="Sil">
-                    <i data-lucide="trash-2" class="w-5 h-5 inline-block"></i>
+                <button onclick="window.deleteInquiry('${inquiry.id}')" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition" aria-label="Sil">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </td>
         `;
@@ -4021,6 +4919,11 @@ window.goToSlide = function(index) {
             });
         };
 window.addEventListener('DOMContentLoaded', () => {
+    // ═══════════════════════════════════════════════════════════════════
+    // 🎨 WHITE LABEL CONFIG UYGULA
+    // ═══════════════════════════════════════════════════════════════════
+    window.applyConfig();
+    
     window.renderProjects(); 
     window.setupMobileMenu();
     window.setupAdminAccess(); 
@@ -4033,6 +4936,77 @@ window.addEventListener('DOMContentLoaded', () => {
     
     lucide.createIcons();
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎨 WHITE LABEL - CONFIG UYGULAMA FONKSİYONU
+// ═══════════════════════════════════════════════════════════════════════════
+window.applyConfig = function() {
+    // Config yüklü mü kontrol et
+    if (typeof SITE_CONFIG === 'undefined') {
+        console.warn('⚠️ site-config.js yüklenmedi, varsayılan ayarlar kullanılıyor.');
+        return;
+    }
+    
+    console.log('✅ Site config yüklendi:', SITE_CONFIG.company?.name);
+    
+    // 1. CSS Değişkenlerini uygula
+    if (typeof getActiveColors === 'function') {
+        const colors = getActiveColors();
+        const root = document.documentElement;
+        
+        root.style.setProperty('--color-brand', colors.primary);
+        root.style.setProperty('--color-brand-dark', colors.primaryDark);
+        root.style.setProperty('--color-brand-light', colors.primaryLight);
+        root.style.setProperty('--color-bg', colors.background);
+        root.style.setProperty('--color-bg-light', colors.backgroundLight);
+        root.style.setProperty('--color-bg-card', colors.backgroundCard);
+        root.style.setProperty('--color-text', colors.text);
+        root.style.setProperty('--color-text-muted', colors.textMuted);
+        root.style.setProperty('--color-text-dark', colors.textDark);
+    }
+    
+    // 2. Sayfa başlığını güncelle
+    if (SITE_CONFIG.seo?.title) {
+        document.title = SITE_CONFIG.seo.title;
+    }
+    
+    // 3. Meta description güncelle
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && SITE_CONFIG.seo?.description) {
+        metaDesc.setAttribute('content', SITE_CONFIG.seo.description);
+    }
+    
+    // 4. Admin panelde firma adını göster
+    const adminCompanyName = document.getElementById('admin-company-name');
+    if (adminCompanyName && SITE_CONFIG.company?.shortName) {
+        adminCompanyName.textContent = SITE_CONFIG.company.shortName;
+    }
+    
+    // 5. Hero bölümünü güncelle (eğer content tanımlıysa)
+    if (SITE_CONFIG.content?.hero) {
+        const heroTitle = document.querySelector('.hero-title');
+        const heroSubtitle = document.querySelector('.hero-description');
+        const heroBadge = document.querySelector('.hero-subtitle');
+        
+        if (heroTitle && SITE_CONFIG.content.hero.title) {
+            heroTitle.innerHTML = SITE_CONFIG.content.hero.title;
+        }
+        if (heroSubtitle && SITE_CONFIG.content.hero.subtitle) {
+            heroSubtitle.textContent = SITE_CONFIG.content.hero.subtitle;
+        }
+        if (heroBadge && SITE_CONFIG.content.hero.badge) {
+            heroBadge.textContent = SITE_CONFIG.content.hero.badge;
+        }
+    }
+    
+    // 6. Footer copyright yılını güncelle
+    const footerYear = document.querySelector('footer p');
+    if (footerYear) {
+        const year = new Date().getFullYear();
+        const companyName = SITE_CONFIG.company?.name || 'Firma';
+        footerYear.innerHTML = `&copy; ${year} ${companyName}. ${SITE_CONFIG.content?.footer?.copyright || 'Tüm Hakları Saklıdır.'}`;
+    }
+}
 
 // ✅ Tarayıcı GERİ TUŞU ile modal kapatma
 window.addEventListener('popstate', (event) => {
