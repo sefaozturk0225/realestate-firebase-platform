@@ -285,9 +285,42 @@ body::-webkit-scrollbar-thumb:hover {
     transition: opacity 0.3s ease;
 }
 
-button:not(.remove-image-btn),
+button:not(.remove-image-btn):not(.card-nav-btn):not(.details-btn),
 a {
     transition: opacity 0.2s ease;
+}
+
+/* ✅ Details Button - Minimal & Performant */
+.details-btn {
+    transition: background-color 0.15s ease;
+    will-change: auto;
+}
+
+.details-btn:hover {
+    background-color: #FDE047; /* yellow-300 */
+}
+
+.details-btn:active {
+    background-color: #FACC15; /* yellow-500 */
+}
+
+/* ✅ Card Navigation Buttons - Performant */
+.card-nav-btn {
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    will-change: auto;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ✅ Mobile Touch Feedback */
+@media (max-width: 768px) {
+    .card-nav-btn:active {
+        background-color: #FACC15 !important;
+        color: #0F172A !important;
+    }
+    
+    .details-btn:active {
+        transform: scale(0.98);
+    }
 }
 
 input,
@@ -358,17 +391,27 @@ img {
         transition-duration: 0.1s !important;
     }
     
-    /* ✅ Transform animasyonlarını kapat */
-    * {
-        transform: none !important;
+    /* ✅ Transform animasyonlarını kapat - CAROUSEL HARİÇ */
+    *:not([id*="-carousel"]):not(.carousel-item) {
+        /* transform: none !important; - KALDIRILDI, carousel'ları bozuyordu */
     }
     
     /* ✅ Detayları Gör butonu için özel fix */
     .details-button,
     button[onclick*="openProjectModal"] {
         opacity: 1 !important;
-        transform: none !important;
         animation: none !important;
+    }
+    
+    /* ✅ KART CAROUSEL OKLARI - Mobilde her zaman görünür */
+    .scroll-snap-card .group-hover\:opacity-100 {
+        opacity: 1 !important;
+    }
+    
+    /* ✅ Carousel okları mobilde daha büyük tıklama alanı */
+    .scroll-snap-card button[onclick*="cardCarousel"] {
+        opacity: 0.9 !important;
+        padding: 0.75rem !important;
     }
 }
 
@@ -387,6 +430,18 @@ img {
 #project-carousel {
     transform: translateZ(0);
     backface-visibility: hidden;
+}
+
+/* ✅ Kart Carousel - Mobilde transform koruması */
+[id*="-carousel"] {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+}
+
+/* ✅ Carousel Container - Touch davranışı */
+.scroll-snap-card .relative.overflow-hidden {
+    touch-action: pan-y pinch-zoom;
 }
 
 /* ✅ MOBİL: Dikey sıralama, normal scroll */
@@ -464,8 +519,30 @@ img {
     }
 }
 
-.modal-open {
-    overflow: hidden;
+/* ✅ SCROLL İZOLASYONU - Basit ve güvenilir yöntem */
+html.modal-open,
+body.modal-open {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
+/* iOS Safari için ek düzeltme */
+body.modal-open {
+    position: relative;
+}
+
+/* Modal içeriği kendi scroll'una sahip olacak */
+#project-modal {
+    overscroll-behavior: contain;
+}
+
+#project-modal .modal-scroll-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100vh;
+    max-height: 100dvh;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -3306,13 +3383,13 @@ window.renderProjectCard = function(project) {
                 
                 <!-- Navigasyon Okları -->
                 ${hasMultipleImages ? `
-                // ✅ YENİ KOD - Sadece opacity animasyonu
+                <!-- ✅ Mobilde görünür, performanslı oklar -->
                 <button onclick="window.cardCarouselPrev('${cardId}', ${project.images.length}); event.stopPropagation();" 
-                class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-yellow-500 text-white hover:text-slate-900 p-2 rounded-full transition-opacity duration-200 z-20 opacity-0 group-hover:opacity-100">
+                class="card-nav-btn absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-500 text-white hover:text-slate-900 p-2.5 rounded-full z-20 md:opacity-0 md:group-hover:opacity-100 opacity-80">
                     <i data-lucide="chevron-left" class="w-5 h-5"></i>
                 </button>
                 <button onclick="window.cardCarouselNext('${cardId}', ${project.images.length}); event.stopPropagation();" 
-                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-yellow-500 text-white hover:text-slate-900 p-2 rounded-full transition-all z-20 opacity-0 group-hover:opacity-100">
+                        class="card-nav-btn absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-500 text-white hover:text-slate-900 p-2.5 rounded-full z-20 md:opacity-0 md:group-hover:opacity-100 opacity-80">
                     <i data-lucide="chevron-right" class="w-5 h-5"></i>
                 </button>
                 
@@ -3379,7 +3456,9 @@ window.updateCardCarousel = function(cardId, totalImages) {
     const carousel = document.getElementById(`${cardId}-carousel`);
     const currentIndex = window.cardCarouselIndexes[cardId] || 0;
     if (carousel) {
-        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+        // ✅ GPU hızlandırma için translate3d kullan
+        carousel.style.transform = `translate3d(-${currentIndex * 100}%, 0, 0)`;
+        carousel.style.transition = 'transform 0.3s ease-out';
         
         // Dot'ları güncelle
         document.querySelectorAll(`[data-card="${cardId}"]`).forEach((dot, idx) => {
@@ -3474,13 +3553,13 @@ window.renderOngoingProjectCard = function(project) {
                 
                 <!-- Navigasyon Okları -->
                 ${hasMultipleImages ? `
-                // ✅ YENİ KOD - Sadece opacity animasyonu
+                <!-- ✅ Mobilde görünür, performanslı oklar -->
 <button onclick="window.cardCarouselPrev('${cardId}', ${project.images.length}); event.stopPropagation();" 
-        class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-yellow-500 text-white hover:text-slate-900 p-2 rounded-full transition-opacity duration-200 z-20 opacity-0 group-hover:opacity-100">
+        class="card-nav-btn absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-500 text-white hover:text-slate-900 p-2.5 rounded-full z-20 md:opacity-0 md:group-hover:opacity-100 opacity-80">
                     <i data-lucide="chevron-left" class="w-5 h-5"></i>
                 </button>
                 <button onclick="window.cardCarouselNext('${cardId}', ${project.images.length}); event.stopPropagation();" 
-                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-yellow-500 text-white hover:text-slate-900 p-2 rounded-full transition-all z-20 opacity-0 group-hover:opacity-100">
+                        class="card-nav-btn absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-yellow-500 text-white hover:text-slate-900 p-2.5 rounded-full z-20 md:opacity-0 md:group-hover:opacity-100 opacity-80">
                     <i data-lucide="chevron-right" class="w-5 h-5"></i>
                 </button>
                 
@@ -3513,8 +3592,8 @@ window.renderOngoingProjectCard = function(project) {
                 <!-- Özellikler Önizleme -->
                 ${featuresPreview ? `<ul class="space-y-1.5 border-t border-slate-700/50 pt-3">${featuresPreview}</ul>` : ''}
                 
-                <!-- Detay Butonu -->
-                <button onclick="window.showProjectModal('${project.id}')" class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-900 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/50 transform hover:-translate-y-0.5">
+                <!-- Detay Butonu - Minimal & Elegant -->
+                <button onclick="window.showProjectModal('${project.id}')" class="details-btn w-full mt-4 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2">
                     <span>Detayları Gör</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
@@ -3951,6 +4030,9 @@ window.showProjectModal = function(id) {
     modal.classList.remove('hidden', 'opacity-0');
     modal.classList.add('flex');
     setTimeout(() => modal.classList.add('opacity-100'), 10);
+    
+    // ✅ SCROLL İZOLASYONU - Sadece overflow hidden (pozisyon değişikliği yok)
+    document.documentElement.classList.add('modal-open');
     document.body.classList.add('modal-open');
     
     // Global değişkenler
@@ -4026,6 +4108,9 @@ window.updateBottomGalleryButtons = function() {
         const modal = document.getElementById('project-modal');
         modal.classList.remove('opacity-100');
         modal.classList.add('opacity-0');
+        
+        // ✅ SCROLL İZOLASYONU - Sadece class kaldır (scroll pozisyonu korunur)
+        document.documentElement.classList.remove('modal-open');
         document.body.classList.remove('modal-open');
         
         // Klavye listener'ı kaldır
@@ -4497,6 +4582,7 @@ window.goToSlide = function(index) {
             modal.classList.remove('hidden', 'opacity-0');
             modal.classList.add('flex');
             setTimeout(() => modal.classList.add('opacity-100'), 10);
+            document.documentElement.classList.add('modal-open');
             document.body.classList.add('modal-open');
             }
 
@@ -4504,6 +4590,7 @@ window.goToSlide = function(index) {
             const modal = document.getElementById('login-modal');
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
+            document.documentElement.classList.remove('modal-open');
             document.body.classList.remove('modal-open');
             setTimeout(() => modal.classList.add('hidden'), 300);
             }
@@ -4757,6 +4844,7 @@ window.goToSlide = function(index) {
             modal.classList.remove('hidden', 'opacity-0');
             modal.classList.add('flex');
             setTimeout(() => modal.classList.add('opacity-100'), 10);
+            document.documentElement.classList.add('modal-open');
             document.body.classList.add('modal-open');
         }
         
@@ -4773,6 +4861,7 @@ window.goToSlide = function(index) {
             const modal = document.getElementById('project-crud-modal');
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
+            document.documentElement.classList.remove('modal-open');
             document.body.classList.remove('modal-open');
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
@@ -5020,6 +5109,9 @@ window.addEventListener('popstate', (event) => {
         if (!state || !state.modalOpen) {
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
+            
+            // ✅ SCROLL İZOLASYONU - Sadece class kaldır
+            document.documentElement.classList.remove('modal-open');
             document.body.classList.remove('modal-open');
             
             // Klavye listener'ı kaldır
